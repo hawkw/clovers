@@ -12,33 +12,37 @@ pub fn random_in_unit_sphere(mut rng: ThreadRng) -> Vec3 {
   }
 }
 
-pub trait Material: Sync + Send {
-  /// Returns `None`, if the ray gets absorbed.
-  /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
+// pub trait Material: Sync + Send {
+//   /// Returns `None`, if the ray gets absorbed.
+//   /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
+//   fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
+// }
+
+#[derive(Copy, Clone)]
+pub enum Material {
+  Lambertian(Lambertian),
+  Metal(Metal),
+  Dielectric(Dielectric),
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct Lambertian {
   albedo: Vec3,
 }
 
-impl Material for Lambertian {
-  fn scatter(&self, _ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)> {
+impl Lambertian {
+  pub fn scatter(&self, _ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)> {
     let target = hit_record.position + hit_record.normal + random_in_unit_sphere(rng);
     let scattered: Ray = Ray::new(hit_record.position, target - hit_record.position);
     let attenuation: Vec3 = self.albedo;
     Some((scattered, attenuation))
   }
-}
-
-impl Lambertian {
   pub fn new(albedo: Vec3) -> Self {
     Lambertian { albedo }
   }
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct Metal {
   albedo: Vec3,
 }
@@ -47,8 +51,8 @@ fn reflect(vector: Vec3, normal: Vec3) -> Vec3 {
   vector - 2.0 * vector.dot(&normal) * normal
 }
 
-impl Material for Metal {
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, _rng: ThreadRng) -> Option<(Ray, Vec3)> {
+impl Metal {
+  pub fn scatter(&self, ray: &Ray, hit_record: &HitRecord, _rng: ThreadRng) -> Option<(Ray, Vec3)> {
     let reflected: Vec3 = reflect(ray.direction.normalize(), hit_record.normal);
     let scattered: Ray = Ray::new(hit_record.position, reflected);
     let attenuation: Vec3 = self.albedo;
@@ -58,9 +62,7 @@ impl Material for Metal {
       None
     }
   }
-}
 
-impl Metal {
   pub fn new(albedo: Vec3) -> Self {
     Metal { albedo }
   }
@@ -84,13 +86,18 @@ fn schlick(cosine: Float, refractive_index: Float) -> Float {
   r0 + (1.0 - r0) * ((1.0 - cosine).powf(5.0))
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct Dielectric {
   refractive_index: Float,
 }
 
-impl Material for Dielectric {
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, mut rng: ThreadRng) -> Option<(Ray, Vec3)> {
+impl Dielectric {
+  pub fn scatter(
+    &self,
+    ray: &Ray,
+    hit_record: &HitRecord,
+    mut rng: ThreadRng,
+  ) -> Option<(Ray, Vec3)> {
     let attenuation: Vec3 = Vec3::new(1.0, 1.0, 1.0); // Glass does not attenuate
     let ni_over_nt: Float;
     let reflect_probability: Float;
@@ -124,9 +131,7 @@ impl Material for Dielectric {
     }
     Some((scattered, attenuation))
   }
-}
 
-impl Dielectric {
   pub fn new(refractive_index: Float) -> Self {
     Dielectric { refractive_index }
   }
