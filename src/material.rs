@@ -15,7 +15,7 @@ pub fn random_in_unit_sphere(mut rng: ThreadRng) -> Vec3 {
 pub trait Material: Sync + Send {
   /// Returns `None`, if the ray gets absorbed.
   /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
+  fn scatter(&self, ray: Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
 }
 
 #[derive(Clone)]
@@ -24,11 +24,12 @@ pub struct Lambertian {
 }
 
 impl Material for Lambertian {
-  fn scatter(&self, _ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)> {
+  fn scatter(&self, mut ray: Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)> {
     let target = hit_record.position + hit_record.normal + random_in_unit_sphere(rng);
-    let scattered: Ray = Ray::new(hit_record.position, target - hit_record.position);
-    let attenuation: Vec3 = self.albedo;
-    Some((scattered, attenuation))
+    ray.origin = hit_record.position;
+    ray.direction = target - hit_record.position;
+    // scattered, attenuation
+    Some((ray, self.albedo))
   }
 }
 
@@ -43,17 +44,20 @@ pub struct Metal {
   albedo: Vec3,
 }
 
+// Reflects a vector based on a given normal, returning the new vector.
 fn reflect(vector: Vec3, normal: Vec3) -> Vec3 {
   vector - 2.0 * vector.dot(&normal) * normal
 }
 
 impl Material for Metal {
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, _rng: ThreadRng) -> Option<(Ray, Vec3)> {
+  fn scatter(&self, mut ray: Ray, hit_record: &HitRecord, _rng: ThreadRng) -> Option<(Ray, Vec3)> {
     let reflected: Vec3 = reflect(ray.direction.normalize(), hit_record.normal);
-    let scattered: Ray = Ray::new(hit_record.position, reflected);
-    let attenuation: Vec3 = self.albedo;
-    if scattered.direction.dot(&hit_record.normal) > 0.0 {
-      Some((scattered, attenuation))
+    // scatter
+    ray.origin = hit_record.position;
+    ray.direction = reflected;
+    if ray.direction.dot(&hit_record.normal) > 0.0 {
+      // scattered, attenuation
+      Some((ray, self.albedo))
     } else {
       None
     }
@@ -90,15 +94,18 @@ pub struct Dielectric {
 }
 
 impl Material for Dielectric {
-  fn scatter(&self, ray: &Ray, hit_record: &HitRecord, mut rng: ThreadRng) -> Option<(Ray, Vec3)> {
+  fn scatter(
+    &self,
+    mut ray: Ray,
+    hit_record: &HitRecord,
+    mut rng: ThreadRng,
+  ) -> Option<(Ray, Vec3)> {
     let attenuation: Vec3 = Vec3::new(1.0, 1.0, 1.0); // Glass does not attenuate
     let ni_over_nt: Float;
     let reflect_probability: Float;
     let cosine: Float;
     let outward_normal: Vec3;
-    let scattered: Ray;
     let mut refracted: Vec3 = Vec3::new(0.0, 0.0, 0.0); // TODO: fix this, shouldn't be zero. see below
-    let reflected: Vec3 = reflect(ray.direction, hit_record.normal);
 
     // TODO: understand and annotate this mess of if-else clauses
     // TODO: cleanup
@@ -118,11 +125,13 @@ impl Material for Dielectric {
       reflect_probability = 1.0;
     }
     if rng.gen::<Float>() < reflect_probability {
-      scattered = Ray::new(hit_record.position, reflected);
+      ray.origin = hit_record.position;
+      ray.direction = reflect(ray.direction, hit_record.normal);
     } else {
-      scattered = Ray::new(hit_record.position, refracted); // TODO: fix this. should be refracted. see above
+      ray.origin = hit_record.position;
+      ray.direction = refracted; // TODO: fix this. should be refracted. see above
     }
-    Some((scattered, attenuation))
+    Some((ray, attenuation))
   }
 }
 

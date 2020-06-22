@@ -44,17 +44,18 @@ type Float = f32;
 type Vec3 = Vector3<Float>;
 
 /// The main coloring function
-fn colorize(ray: &Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 {
+fn colorize(ray: Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 {
     let color: Vec3;
 
-    match world.hit(&ray, SHADOW_SMOOTHING, Float::MAX) {
+    match world.hit(ray, SHADOW_SMOOTHING, Float::MAX) {
         Some(hit_record) => {
             // Hit an object, scatter and colorize the new ray
             if depth < MAX_DEPTH {
                 if let Some((scattered, attenuation)) =
-                    hit_record.material.scatter(&ray, &hit_record, rng)
+                    // NOTE: copy occurs
+                    hit_record.material.scatter(ray, &hit_record, rng)
                 {
-                    color = attenuation.component_mul(&colorize(&scattered, world, depth + 1, rng));
+                    color = attenuation.component_mul(&colorize(scattered, world, depth + 1, rng));
                     return color;
                 }
             }
@@ -63,10 +64,8 @@ fn colorize(ray: &Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 
             color
         }
         None => {
-            // Background, blue-white gradient. Magic from tutorial.
-            let unit_direction: Vec3 = ray.direction.normalize();
-            let t = 0.5 * (unit_direction.y + 1.0);
-            color = (1.0 - t) * Vector3::new(1.0, 1.0, 1.0) + t * Vector3::new(0.5, 0.7, 1.0);
+            // Background
+            color = Vec3::new(0.3, 0.3, 0.3);
             color
         }
     }
@@ -74,9 +73,9 @@ fn colorize(ray: &Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 
 
 fn color_to_rgb(color: Vec3) -> Rgb<u8> {
     // Integer-i-fy
-    let r = (255.99 * color.x).floor() as u8;
-    let g = (255.99 * color.y).floor() as u8;
-    let b = (255.99 * color.z).floor() as u8;
+    let r = (255.99 * color.x) as u8;
+    let g = (255.99 * color.y) as u8;
+    let b = (255.99 * color.z) as u8;
     Rgb([r, g, b])
 }
 
@@ -181,7 +180,7 @@ fn draw() -> ImageResult<()> {
                 u = (x as Float + rng.gen::<Float>()) / WIDTH as Float;
                 v = (y as Float + rng.gen::<Float>()) / HEIGHT as Float;
                 ray = camera.get_ray(u, v, rng);
-                color += colorize(&ray, &world, 0, rng);
+                color += colorize(ray, &world, 0, rng);
             }
             color /= ANTIALIAS_SAMPLES as Float;
 

@@ -18,7 +18,7 @@ impl Sphere {
 }
 
 impl Hitable for Sphere {
-  fn hit(&self, ray: &Ray, distance_min: Float, distance_max: Float) -> Option<HitRecord> {
+  fn hit(&self, ray: Ray, distance_min: Float, distance_max: Float) -> Option<HitRecord> {
     let oc = ray.origin - self.center;
     let a = ray.direction.dot(&ray.direction);
     let b = oc.dot(&ray.direction);
