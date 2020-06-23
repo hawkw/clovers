@@ -8,7 +8,7 @@ use image::{ImageBuffer, ImageResult, Rgb, RgbImage};
 
 use nalgebra::Vector3;
 
-use std::{sync::Arc, time::Instant};
+use std::time::Instant;
 
 use chrono::Utc;
 
@@ -51,12 +51,9 @@ fn colorize(ray: &Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 
         Some(hit_record) => {
             // Hit an object, scatter and colorize the new ray
             if depth < MAX_DEPTH {
-                if let Some((scattered, attenuation)) = match hit_record.material {
-                    Material::Lambertian(Lambertian) => Lambertian.scatter(&ray, &hit_record, rng),
-                    Material::Metal(Metal) => Metal.scatter(&ray, &hit_record, rng),
-                    Material::Dielectric(Dielectric) => Dielectric.scatter(&ray, &hit_record, rng),
-                    _ => panic!("Unknown material"),
-                } {
+                if let Some((scattered, attenuation)) =
+                    hit_record.material.scatter(&ray, &hit_record, rng)
+                {
                     color = attenuation.component_mul(&colorize(&scattered, world, depth + 1, rng));
                     return color;
                 }

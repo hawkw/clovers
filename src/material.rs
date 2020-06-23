@@ -18,13 +18,21 @@ pub enum Material {
     Dielectric(Dielectric),
 }
 
-// pub trait Material: Sync + Send {
-//     /// Returns `None`, if the ray gets absorbed.
-//     /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
-//     fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
-// }
+impl Material {
+    pub fn scatter(
+        &self,
+        ray: &Ray,
+        hit_record: &HitRecord,
+        rng: ThreadRng,
+    ) -> Option<(Ray, Vec3)> {
+        match self {
+            Material::Lambertian(m) => m.scatter(&ray, &hit_record, rng),
+            Material::Metal(m) => m.scatter(&ray, &hit_record, rng),
+            Material::Dielectric(m) => m.scatter(&ray, &hit_record, rng),
+        }
+    }
+}
 
-#[derive(Clone)]
 pub struct Lambertian {
     albedo: Vec3,
 }
@@ -46,7 +54,6 @@ impl Lambertian {
     }
 }
 
-#[derive(Clone)]
 pub struct Metal {
     albedo: Vec3,
 }
@@ -94,7 +101,6 @@ fn schlick(cosine: Float, refractive_index: Float) -> Float {
     r0 + (1.0 - r0) * ((1.0 - cosine).powf(5.0))
 }
 
-#[derive(Clone)]
 pub struct Dielectric {
     refractive_index: Float,
 }
