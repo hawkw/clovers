@@ -51,9 +51,12 @@ fn colorize(ray: &Ray, world: &dyn Hitable, depth: u32, rng: ThreadRng) -> Vec3 
         Some(hit_record) => {
             // Hit an object, scatter and colorize the new ray
             if depth < MAX_DEPTH {
-                if let Some((scattered, attenuation)) =
-                    hit_record.material.scatter(&ray, &hit_record, rng)
-                {
+                if let Some((scattered, attenuation)) = match hit_record.material {
+                    Material::Lambertian(Lambertian) => Lambertian.scatter(&ray, &hit_record, rng),
+                    Material::Metal(Metal) => Metal.scatter(&ray, &hit_record, rng),
+                    Material::Dielectric(Dielectric) => Dielectric.scatter(&ray, &hit_record, rng),
+                    _ => panic!("Unknown material"),
+                } {
                     color = attenuation.component_mul(&colorize(&scattered, world, depth + 1, rng));
                     return color;
                 }
@@ -108,7 +111,7 @@ fn draw() -> ImageResult<()> {
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5))),
+        Material::Lambertian(Lambertian::new(Vec3::new(0.5, 0.5, 0.5))),
     )));
     let mut rng = rand::thread_rng();
     for a in -11..11 {
@@ -124,7 +127,7 @@ fn draw() -> ImageResult<()> {
                     world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(Lambertian::new(Vec3::new(
+                        Material::Lambertian(Lambertian::new(Vec3::new(
                             rng.gen::<Float>() * rng.gen::<Float>(),
                             rng.gen::<Float>() * rng.gen::<Float>(),
                             rng.gen::<Float>() * rng.gen::<Float>(),
@@ -134,7 +137,7 @@ fn draw() -> ImageResult<()> {
                     world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(Metal::new(Vec3::new(
+                        Material::Metal(Metal::new(Vec3::new(
                             0.5 * (1.0 + rng.gen::<Float>()),
                             0.5 * (1.0 + rng.gen::<Float>()),
                             0.5 * (1.0 + rng.gen::<Float>()),
@@ -144,7 +147,7 @@ fn draw() -> ImageResult<()> {
                     world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(Dielectric::new(1.5)),
+                        Material::Dielectric(Dielectric::new(1.5)),
                     )));
                 }
             }
@@ -153,17 +156,17 @@ fn draw() -> ImageResult<()> {
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 1.0, 0.0),
         1.0,
-        Arc::new(Dielectric::new(1.5)),
+        Material::Dielectric(Dielectric::new(1.5)),
     )));
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(-4.0, 1.0, 0.0),
         1.0,
-        Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
+        Material::Lambertian(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
     )));
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(4.0, 1.0, 0.0),
         1.0,
-        Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5))),
+        Material::Metal(Metal::new(Vec3::new(0.7, 0.6, 0.5))),
     )));
     // End scene
 
