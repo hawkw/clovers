@@ -32,7 +32,7 @@ impl Camera {
     aspect_ratio: Float,
     aperture: Float,
     focus_distance: Float,
-  ) -> Self {
+  ) -> Camera {
     let lens_radius = aperture / 2.0;
     let theta: Float = vertical_fov * std::f32::consts::PI / 180.0; // TODO: make this a Float too, for global precision
     let half_height: Float = (theta / 2.0).tan();
@@ -41,12 +41,12 @@ impl Camera {
     let w: Vec3 = (look_from - look_at).normalize();
     let u: Vec3 = (up.cross(&w)).normalize();
     let v: Vec3 = w.cross(&u);
-
+    
     // TODO: understand this defocus
     let lower_left_corner: Vec3 = origin
-      - half_width * focus_distance * u
-      - half_height * focus_distance * v
-      - focus_distance * w;
+    - half_width * focus_distance * u
+    - half_height * focus_distance * v
+    - focus_distance * w;
     let horizontal: Vec3 = 2.0 * half_width * focus_distance * u;
     let vertical: Vec3 = 2.0 * half_height * focus_distance * v;
     Camera {
@@ -60,7 +60,7 @@ impl Camera {
       w,
     }
   }
-
+  
   // TODO: fix the mysterious (u,v) vs (s,t) change that came from the tutorial
   pub fn get_ray(&self, s: Float, t: Float, mut rng: ThreadRng) -> Ray {
     let rd: Vec3 = self.lens_radius * random_in_unit_disk(&mut rng);

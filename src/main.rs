@@ -8,7 +8,7 @@ use image::{ImageBuffer, ImageResult, Rgb, RgbImage};
 
 use nalgebra::Vector3;
 
-use std::{sync::Arc, time::Instant};
+use std::time::Instant;
 
 use chrono::Utc;
 
@@ -107,7 +107,7 @@ fn draw() -> ImageResult<()> {
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5))),
+        Lambertian::new(Vec3::new(0.5, 0.5, 0.5)),
     )));
     let mut rng = rand::thread_rng();
     for a in -11..11 {
@@ -123,28 +123,26 @@ fn draw() -> ImageResult<()> {
                     world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(Lambertian::new(Vec3::new(
+                        Lambertian::new(Vec3::new(
                             rng.gen::<Float>() * rng.gen::<Float>(),
                             rng.gen::<Float>() * rng.gen::<Float>(),
                             rng.gen::<Float>() * rng.gen::<Float>(),
-                        ))),
+                        )),
                     )));
                 } else if choose_mat < 0.95 {
                     world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(Metal::new(Vec3::new(
+                        Metal::new(Vec3::new(
                             0.5 * (1.0 + rng.gen::<Float>()),
                             0.5 * (1.0 + rng.gen::<Float>()),
                             0.5 * (1.0 + rng.gen::<Float>()),
-                        ))),
+                        )),
                     )));
                 } else {
-                    world.hitables.push(Box::new(Sphere::new(
-                        center,
-                        0.2,
-                        Arc::new(Dielectric::new(1.5)),
-                    )));
+                    world
+                        .hitables
+                        .push(Box::new(Sphere::new(center, 0.2, (Dielectric::new(1.5)))));
                 }
             }
         }
@@ -152,17 +150,17 @@ fn draw() -> ImageResult<()> {
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 1.0, 0.0),
         1.0,
-        Arc::new(Dielectric::new(1.5)),
+        Dielectric::new(1.5),
     )));
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(-4.0, 1.0, 0.0),
         1.0,
-        Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
+        Lambertian::new(Vec3::new(0.4, 0.2, 0.1)),
     )));
     world.hitables.push(Box::new(Sphere::new(
         Vec3::new(4.0, 1.0, 0.0),
         1.0,
-        Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5))),
+        Metal::new(Vec3::new(0.7, 0.6, 0.5)),
     )));
     // End scene
 

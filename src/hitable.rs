@@ -1,11 +1,10 @@
 use crate::{Float, Material, Ray, Vec3};
-use std::sync::Arc;
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
   pub distance: Float,
   pub position: Vec3,
   pub normal: Vec3,
-  pub material: Arc<dyn Material>,
+  pub material: Box<&'a dyn Material>,
 }
 
 pub trait Hitable: Sync + Send {

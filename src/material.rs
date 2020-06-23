@@ -12,13 +12,12 @@ pub fn random_in_unit_sphere(mut rng: ThreadRng) -> Vec3 {
   }
 }
 
-pub trait Material: Sync + Send {
+pub trait Material: Sync + Send + Sized {
   /// Returns `None`, if the ray gets absorbed.
   /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
   fn scatter(&self, ray: Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Vec3)>;
 }
 
-#[derive(Clone)]
 pub struct Lambertian {
   albedo: Vec3,
 }
@@ -39,7 +38,6 @@ impl Lambertian {
   }
 }
 
-#[derive(Clone)]
 pub struct Metal {
   albedo: Vec3,
 }
@@ -50,7 +48,12 @@ fn reflect(vector: Vec3, normal: Vec3) -> Vec3 {
 }
 
 impl Material for Metal {
-  fn scatter(&self, mut ray: Ray, hit_record: &HitRecord, _rng: ThreadRng) -> Option<(Ray, Vec3)> {
+  fn scatter(
+    &self,
+    mut ray: Ray,
+    hit_record: &HitRecord,
+    _rng: ThreadRng,
+  ) -> Option<(Ray, Vec3)> {
     let reflected: Vec3 = reflect(ray.direction.normalize(), hit_record.normal);
     // scatter
     ray.origin = hit_record.position;
@@ -88,7 +91,6 @@ fn schlick(cosine: Float, refractive_index: Float) -> Float {
   r0 + (1.0 - r0) * ((1.0 - cosine).powf(5.0))
 }
 
-#[derive(Clone)]
 pub struct Dielectric {
   refractive_index: Float,
 }
@@ -106,13 +108,14 @@ impl Material for Dielectric {
     let cosine: Float;
     let outward_normal: Vec3;
     let mut refracted: Vec3 = Vec3::new(0.0, 0.0, 0.0); // TODO: fix this, shouldn't be zero. see below
-
+    
     // TODO: understand and annotate this mess of if-else clauses
     // TODO: cleanup
     if ray.direction.dot(&hit_record.normal) > 0.0 {
       outward_normal = -hit_record.normal;
       ni_over_nt = self.refractive_index;
-      cosine = self.refractive_index * ray.direction.dot(&hit_record.normal) / ray.direction.norm();
+      cosine = self.refractive_index * ray.direction.dot(&hit_record.normal)
+      / ray.direction.norm();
     } else {
       outward_normal = hit_record.normal;
       ni_over_nt = 1.0 / self.refractive_index;
