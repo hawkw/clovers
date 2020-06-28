@@ -2,7 +2,7 @@ use crate::{Float, Material, Ray, Vec3};
 use rand::prelude::*;
 use std::cmp::Ordering;
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     /// Distance from the ray origin to the hitpoint
     pub distance: Float,
     /// 3D coordinate of the hitpoint
@@ -14,12 +14,12 @@ pub struct HitRecord {
     /// V surface coordinate of the hitpoint
     pub v: Float,
     /// Reference to the material at the hitpoint
-    pub material: Box<dyn Material>,
+    pub material: &'a dyn Material,
     /// Is the hitpoint at the front of the surface
     pub front_face: bool,
 }
 
-impl HitRecord {
+impl<'a> HitRecord<'a> {
     // Helper function for getting normals pointing at the correct direction
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Vec3) {
         self.front_face = ray.direction.dot(&outward_normal) < 0.0;
@@ -38,11 +38,11 @@ pub trait Hitable: Sync + Send {
 }
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
-pub struct HitableList {
-    pub hitables: Vec<Box<dyn Hitable>>,
+pub struct HitableList<'a> {
+    pub hitables: Vec<&'a dyn Hitable>,
 }
 
-impl Hitable for HitableList {
+impl<'a> Hitable for HitableList<'a> {
     fn hit(&self, ray: &Ray, distance_min: Float, distance_max: Float) -> Option<HitRecord> {
         let mut hit_record: Option<HitRecord> = None;
         let mut closest = distance_max;
@@ -90,8 +90,8 @@ impl Hitable for HitableList {
     }
 }
 
-impl HitableList {
-    pub fn new() -> HitableList {
+impl<'a> HitableList<'a> {
+    pub fn new() -> HitableList<'a> {
         HitableList {
             hitables: Vec::new(),
         }
@@ -101,7 +101,7 @@ impl HitableList {
     //         self.hitables.push(Box::new(object));
     //     }
 
-    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode {
+    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode<'a> {
         let bvh_node = BVHNode::from_list(self, time_0, time_1, rng);
         bvh_node
     }
@@ -153,13 +153,13 @@ impl AABB {
     }
 }
 
-pub struct BVHNode {
-    left: &'static Box<dyn Hitable>,
-    right: &'static Box<dyn Hitable>,
+pub struct BVHNode<'a> {
+    left: &'a dyn Hitable,
+    right: &'a dyn Hitable,
     bounding_box: AABB,
 }
 
-impl Hitable for BVHNode {
+impl Hitable for BVHNode<'_> {
     fn hit(&self, ray: &Ray, distance_min: Float, distance_max: Float) -> Option<HitRecord> {
         match self.bounding_box.hit(ray, distance_min, distance_max) {
             false => None,
@@ -197,13 +197,13 @@ impl Hitable for BVHNode {
     }
 }
 
-impl BVHNode {
+impl<'a> BVHNode<'a> {
     pub fn from_list(
-        objects: HitableList,
+        objects: HitableList<'a>,
         time_0: Float,
         time_1: Float,
         mut rng: ThreadRng,
-    ) -> BVHNode {
+    ) -> BVHNode<'a> {
         {
             let axis: usize = rng.gen_range(0, 2);
             let comparators = [box_x_compare, box_y_compare, box_z_compare];
@@ -213,23 +213,23 @@ impl BVHNode {
 
             let object_span = objects.len();
 
-            let left: &Box<dyn Hitable>;
-            let right: &Box<dyn Hitable>;
+            let left: &dyn Hitable;
+            let right: &dyn Hitable;
 
             if object_span == 1 {
                 // If we only have one object, return itself. Note: no explicit leaf type in our tree
-                left = &objects[0];
-                right = &objects[0];
+                left = &*objects[0];
+                right = &*objects[0];
             } else if object_span == 2 {
                 // If we are comparing two objects, perform the comparison
                 match comparator(&*objects[0], &*objects[1]) {
                     Ordering::Less => {
-                        left = &objects[0];
-                        right = &objects[1];
+                        left = &*objects[0];
+                        right = &*objects[1];
                     }
                     Ordering::Greater => {
-                        left = &objects[1];
-                        right = &objects[0];
+                        left = &*objects[1];
+                        right = &*objects[0];
                     }
                     Ordering::Equal => {
                         // TODO: what should happen here?
@@ -244,21 +244,16 @@ impl BVHNode {
                 let mid = object_span / 2;
                 let objects_right = objects.split_off(mid);
 
-                left = &Box::new(BVHNode::from_list(
-                    HitableList { hitables: objects },
-                    time_0,
-                    time_1,
-                    rng,
-                ));
+                left = &BVHNode::from_list(HitableList { hitables: objects }, time_0, time_1, rng);
 
-                right = &Box::new(BVHNode::from_list(
+                right = &BVHNode::from_list(
                     HitableList {
                         hitables: objects_right,
                     },
                     time_0,
                     time_1,
                     rng,
-                ));
+                );
             }
 
             let box_left = left.bounding_box(time_0, time_1);

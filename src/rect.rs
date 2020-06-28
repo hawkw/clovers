@@ -3,28 +3,27 @@ use crate::{
     material::Material,
     Float, Vec3, RECT_EPSILON,
 };
-use std::sync::Arc;
 
 // XY
 
-pub struct XYRect {
+pub struct XYRect<'a> {
     x0: Float,
     x1: Float,
     y0: Float,
     y1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl XYRect {
+impl<'a> XYRect<'_> {
     pub fn new(
         x0: Float,
         x1: Float,
         y0: Float,
         y1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> XYRect {
+        material: &'a dyn Material,
+    ) -> XYRect<'a> {
         XYRect {
             x0,
             x1,
@@ -36,7 +35,7 @@ impl XYRect {
     }
 }
 
-impl Hitable for XYRect {
+impl Hitable for XYRect<'_> {
     fn hit(
         &self,
         ray: &crate::ray::Ray,
@@ -80,24 +79,24 @@ impl Hitable for XYRect {
 
 // XZ
 
-pub struct XZRect {
+pub struct XZRect<'a> {
     x0: Float,
     x1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl XZRect {
+impl<'a> XZRect<'a> {
     pub fn new(
         x0: Float,
         x1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> XZRect {
+        material: &'a dyn Material,
+    ) -> XZRect<'a> {
         XZRect {
             x0,
             x1,
@@ -109,7 +108,7 @@ impl XZRect {
     }
 }
 
-impl Hitable for XZRect {
+impl Hitable for XZRect<'_> {
     fn hit(
         &self,
         ray: &crate::ray::Ray,
@@ -153,24 +152,24 @@ impl Hitable for XZRect {
 
 // YZ
 
-pub struct YZRect {
+pub struct YZRect<'a> {
     y0: Float,
     y1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl YZRect {
+impl<'a> YZRect<'a> {
     pub fn new(
         y0: Float,
         y1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> YZRect {
+        material: &'a dyn Material,
+    ) -> YZRect<'a> {
         YZRect {
             y0,
             y1,
@@ -182,7 +181,7 @@ impl YZRect {
     }
 }
 
-impl Hitable for YZRect {
+impl<'a> Hitable for YZRect<'a> {
     fn hit(
         &self,
         ray: &crate::ray::Ray,

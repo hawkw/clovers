@@ -31,11 +31,11 @@ pub trait Material: Sync + Send {
     }
 }
 
-pub struct Lambertian {
-    albedo: Box<dyn Texture>,
+pub struct Lambertian<'a> {
+    albedo: &'a dyn Texture,
 }
 
-impl Material for Lambertian {
+impl<'a> Material for Lambertian<'a> {
     fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Color)> {
         let scatter_direction: Vec3 = hit_record.normal + random_unit_vector(rng);
         let scattered = Ray::new(hit_record.position, scatter_direction, ray.time);
@@ -54,14 +54,14 @@ impl Material for Lambertian {
     }
 }
 
-impl Lambertian {
-    pub fn new(albedo: Box<dyn Texture>) -> Self {
+impl<'a> Lambertian<'a> {
+    pub fn new(albedo: &'a dyn Texture) -> Self {
         Lambertian { albedo }
     }
 }
 
-pub struct Metal {
-    albedo: Box<dyn Texture>,
+pub struct Metal<'a> {
+    albedo: &'a dyn Texture,
     fuzz: Float,
 }
 
@@ -69,7 +69,7 @@ fn reflect(vector: Vec3, normal: Vec3) -> Vec3 {
     vector - 2.0 * vector.dot(&normal) * normal
 }
 
-impl Material for Metal {
+impl<'a> Material for Metal<'a> {
     fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Color)> {
         let reflected: Vec3 = reflect(ray.direction.normalize(), hit_record.normal);
         let scattered: Ray = Ray::new(
@@ -88,8 +88,8 @@ impl Material for Metal {
     }
 }
 
-impl Metal {
-    pub fn new(albedo: Box<dyn Texture>, fuzz: Float) -> Self {
+impl<'a> Metal<'a> {
+    pub fn new(albedo: &'a dyn Texture, fuzz: Float) -> Self {
         Metal {
             albedo,
             fuzz: fuzz.min(1.0),
@@ -155,11 +155,11 @@ impl Dielectric {
     }
 }
 
-pub struct DiffuseLight {
-    emit: Box<dyn Texture>,
+pub struct DiffuseLight<'a> {
+    emit: &'a dyn Texture,
 }
 
-impl Material for DiffuseLight {
+impl<'a> Material for DiffuseLight<'a> {
     fn scatter(
         &self,
         _ray: &Ray,
@@ -174,8 +174,8 @@ impl Material for DiffuseLight {
 }
 
 // TODO: figure out why this sometimes returns odd black reflections
-impl DiffuseLight {
-    pub fn new(emission: Box<dyn Texture>) -> Self {
+impl<'a> DiffuseLight<'a> {
+    pub fn new(emission: &'a dyn Texture) -> Self {
         DiffuseLight { emit: emission }
     }
 }
