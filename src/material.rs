@@ -1,6 +1,5 @@
 use crate::{color::Color, texture::Texture, Float, HitRecord, Ray, ThreadRng, Vec3, PI};
 use rand::prelude::*;
-use std::sync::Arc;
 
 // Internal helper. Originally used for lambertian reflection with flaws
 fn random_in_unit_sphere(mut rng: ThreadRng) -> Vec3 {
@@ -32,9 +31,8 @@ pub trait Material: Sync + Send {
     }
 }
 
-#[derive(Clone)]
 pub struct Lambertian {
-    albedo: Arc<dyn Texture>,
+    albedo: Box<dyn Texture>,
 }
 
 impl Material for Lambertian {
@@ -57,16 +55,13 @@ impl Material for Lambertian {
 }
 
 impl Lambertian {
-    pub fn new(albedo: Arc<dyn Texture>) -> Self {
-        Lambertian {
-            albedo: Arc::clone(&albedo),
-        }
+    pub fn new(albedo: Box<dyn Texture>) -> Self {
+        Lambertian { albedo }
     }
 }
 
-#[derive(Clone)]
 pub struct Metal {
-    albedo: Arc<dyn Texture>,
+    albedo: Box<dyn Texture>,
     fuzz: Float,
 }
 
@@ -94,9 +89,9 @@ impl Material for Metal {
 }
 
 impl Metal {
-    pub fn new(albedo: Arc<dyn Texture>, fuzz: Float) -> Self {
+    pub fn new(albedo: Box<dyn Texture>, fuzz: Float) -> Self {
         Metal {
-            albedo: Arc::clone(&albedo),
+            albedo,
             fuzz: fuzz.min(1.0),
         }
     }
@@ -115,7 +110,6 @@ fn schlick(cosine: Float, refractive_index: Float) -> Float {
     r0 + (1.0 - r0) * ((1.0 - cosine).powf(5.0))
 }
 
-#[derive(Clone)]
 pub struct Dielectric {
     refractive_index: Float,
 }
@@ -162,7 +156,7 @@ impl Dielectric {
 }
 
 pub struct DiffuseLight {
-    emit: Arc<dyn Texture>,
+    emit: Box<dyn Texture>,
 }
 
 impl Material for DiffuseLight {
@@ -181,9 +175,7 @@ impl Material for DiffuseLight {
 
 // TODO: figure out why this sometimes returns odd black reflections
 impl DiffuseLight {
-    pub fn new(emission: Arc<dyn Texture>) -> Self {
-        DiffuseLight {
-            emit: Arc::clone(&emission),
-        }
+    pub fn new(emission: Box<dyn Texture>) -> Self {
+        DiffuseLight { emit: emission }
     }
 }

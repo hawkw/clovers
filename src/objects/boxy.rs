@@ -4,68 +4,37 @@ use crate::{
     rect::{XYRect, XZRect, YZRect},
     Vec3,
 };
-use std::sync::Arc;
 
 // Avoid keyword clash
 pub struct Boxy {
     corner_0: Vec3,
     corner_1: Vec3,
     sides: HitableList,
-    material: Arc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl Boxy {
-    pub fn new(corner_0: Vec3, corner_1: Vec3, material: Arc<dyn Material>) -> Boxy {
+    pub fn new(corner_0: Vec3, corner_1: Vec3, material: Box<dyn Material>) -> Boxy {
         let mut sides = HitableList::new();
-        sides.hitables.push(Arc::new(XYRect::new(
-            corner_0.x,
-            corner_1.x,
-            corner_0.y,
-            corner_1.y,
-            corner_1.z,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(XYRect::new(
+            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_1.z, material,
         )));
-        sides.hitables.push(Arc::new(XYRect::new(
-            corner_0.x,
-            corner_1.x,
-            corner_0.y,
-            corner_1.y,
-            corner_0.z,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(XYRect::new(
+            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_0.z, material,
         )));
 
-        sides.hitables.push(Arc::new(XZRect::new(
-            corner_0.x,
-            corner_1.x,
-            corner_0.z,
-            corner_1.z,
-            corner_1.y,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(XZRect::new(
+            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_1.y, material,
         )));
-        sides.hitables.push(Arc::new(XZRect::new(
-            corner_0.x,
-            corner_1.x,
-            corner_0.z,
-            corner_1.z,
-            corner_0.y,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(XZRect::new(
+            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_0.y, material,
         )));
 
-        sides.hitables.push(Arc::new(YZRect::new(
-            corner_0.y,
-            corner_1.y,
-            corner_0.z,
-            corner_1.z,
-            corner_1.x,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(YZRect::new(
+            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_1.x, material,
         )));
-        sides.hitables.push(Arc::new(YZRect::new(
-            corner_0.y,
-            corner_1.y,
-            corner_0.z,
-            corner_1.z,
-            corner_0.x,
-            Arc::clone(&material),
+        sides.hitables.push(Box::new(YZRect::new(
+            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_0.x, material,
         )));
 
         Boxy {

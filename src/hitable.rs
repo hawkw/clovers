@@ -1,6 +1,6 @@
 use crate::{Float, Material, Ray, Vec3};
 use rand::prelude::*;
-use std::{cmp::Ordering, sync::Arc};
+use std::cmp::Ordering;
 
 pub struct HitRecord {
     /// Distance from the ray origin to the hitpoint
@@ -14,7 +14,7 @@ pub struct HitRecord {
     /// V surface coordinate of the hitpoint
     pub v: Float,
     /// Reference to the material at the hitpoint
-    pub material: Arc<dyn Material>,
+    pub material: Box<dyn Material>,
     /// Is the hitpoint at the front of the surface
     pub front_face: bool,
 }
@@ -39,7 +39,7 @@ pub trait Hitable: Sync + Send {
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
 pub struct HitableList {
-    pub hitables: Vec<Arc<dyn Hitable>>,
+    pub hitables: Vec<Box<dyn Hitable>>,
 }
 
 impl Hitable for HitableList {
@@ -154,89 +154,9 @@ impl AABB {
 }
 
 pub struct BVHNode {
-    left: Arc<dyn Hitable>,
-    right: Arc<dyn Hitable>,
+    left: &'static Box<dyn Hitable>,
+    right: &'static Box<dyn Hitable>,
     bounding_box: AABB,
-}
-
-impl BVHNode {
-    pub fn from_list(
-        objects: HitableList,
-        time_0: Float,
-        time_1: Float,
-        mut rng: ThreadRng,
-    ) -> BVHNode {
-        {
-            let axis: usize = rng.gen_range(0, 2);
-            let comparators = [box_x_compare, box_y_compare, box_z_compare];
-            let comparator = comparators[axis];
-
-            let mut objects = objects.hitables; // Extract the actual Vec from the HitableList struct
-
-            let object_span = objects.len();
-
-            let left: Arc<dyn Hitable>;
-            let right: Arc<dyn Hitable>;
-
-            if object_span == 1 {
-                // If we only have one object, return itself. Note: no explicit leaf type in our tree
-                left = Arc::clone(&objects[0]);
-                right = Arc::clone(&objects[0]);
-            } else if object_span == 2 {
-                // If we are comparing two objects, perform the comparison
-                match comparator(&*objects[0], &*objects[1]) {
-                    Ordering::Less => {
-                        left = Arc::clone(&objects[0]);
-                        right = Arc::clone(&objects[1]);
-                    }
-                    Ordering::Greater => {
-                        left = Arc::clone(&objects[1]);
-                        right = Arc::clone(&objects[0]);
-                    }
-                    Ordering::Equal => {
-                        // TODO: what should happen here?
-                        panic!("Equal objects in BVHNode from_list");
-                    }
-                }
-            } else {
-                // Otherwise, recurse
-                objects.sort_by(|a, b| comparator(&**a, &**b));
-
-                // Split the vector; divide and conquer
-                let mid = object_span / 2;
-                let objects_right = objects.split_off(mid);
-                left = Arc::new(BVHNode::from_list(
-                    HitableList { hitables: objects },
-                    time_0,
-                    time_1,
-                    rng,
-                ));
-                right = Arc::new(BVHNode::from_list(
-                    HitableList {
-                        hitables: objects_right,
-                    },
-                    time_0,
-                    time_1,
-                    rng,
-                ));
-            }
-
-            let box_left = left.bounding_box(time_0, time_1);
-            let box_right = right.bounding_box(time_0, time_1);
-
-            if box_left.is_none() || box_right.is_none() {
-                panic!("No bounding box in bvh_node constructor");
-            } else {
-                let bounding_box = AABB::surrounding_box(box_left.unwrap(), box_right.unwrap());
-
-                BVHNode {
-                    left,
-                    right,
-                    bounding_box,
-                }
-            }
-        }
-    }
 }
 
 impl Hitable for BVHNode {
@@ -274,6 +194,88 @@ impl Hitable for BVHNode {
     }
     fn bounding_box(&self, _t0: Float, _t11: Float) -> Option<AABB> {
         Some(self.bounding_box)
+    }
+}
+
+impl BVHNode {
+    pub fn from_list(
+        objects: HitableList,
+        time_0: Float,
+        time_1: Float,
+        mut rng: ThreadRng,
+    ) -> BVHNode {
+        {
+            let axis: usize = rng.gen_range(0, 2);
+            let comparators = [box_x_compare, box_y_compare, box_z_compare];
+            let comparator = comparators[axis];
+
+            let mut objects = objects.hitables; // Extract the actual Vec from the HitableList struct
+
+            let object_span = objects.len();
+
+            let left: &Box<dyn Hitable>;
+            let right: &Box<dyn Hitable>;
+
+            if object_span == 1 {
+                // If we only have one object, return itself. Note: no explicit leaf type in our tree
+                left = &objects[0];
+                right = &objects[0];
+            } else if object_span == 2 {
+                // If we are comparing two objects, perform the comparison
+                match comparator(&*objects[0], &*objects[1]) {
+                    Ordering::Less => {
+                        left = &objects[0];
+                        right = &objects[1];
+                    }
+                    Ordering::Greater => {
+                        left = &objects[1];
+                        right = &objects[0];
+                    }
+                    Ordering::Equal => {
+                        // TODO: what should happen here?
+                        panic!("Equal objects in BVHNode from_list");
+                    }
+                }
+            } else {
+                // Otherwise, recurse
+                objects.sort_by(|a, b| comparator(&**a, &**b));
+
+                // Split the vector; divide and conquer
+                let mid = object_span / 2;
+                let objects_right = objects.split_off(mid);
+
+                left = &Box::new(BVHNode::from_list(
+                    HitableList { hitables: objects },
+                    time_0,
+                    time_1,
+                    rng,
+                ));
+
+                right = &Box::new(BVHNode::from_list(
+                    HitableList {
+                        hitables: objects_right,
+                    },
+                    time_0,
+                    time_1,
+                    rng,
+                ));
+            }
+
+            let box_left = left.bounding_box(time_0, time_1);
+            let box_right = right.bounding_box(time_0, time_1);
+
+            if box_left.is_none() || box_right.is_none() {
+                panic!("No bounding box in bvh_node constructor");
+            } else {
+                let bounding_box = AABB::surrounding_box(box_left.unwrap(), box_right.unwrap());
+
+                BVHNode {
+                    left,
+                    right,
+                    bounding_box,
+                }
+            }
+        }
     }
 }
 

@@ -27,10 +27,11 @@ mod scenes;
 use color::Color;
 use hitable::{BVHNode, HitRecord, Hitable};
 #[allow(unused)] // Scene imports, only using one at a time
-use scenes::{
-    cornell, cornell_with_boxes, glass_spheres, metal_spheres, random_scene,
-    simple_light_lambertian, simple_light_perlin, two_perlin_spheres, two_spheres,
-};
+// use scenes::{
+//     cornell, cornell_with_boxes, glass_spheres, metal_spheres, random_scene,
+//     simple_light_lambertian, simple_light_perlin, two_perlin_spheres, two_spheres,
+// };
+use scenes::cornell_with_boxes;
 mod perlin;
 mod rect;
 mod texture;

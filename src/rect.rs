@@ -13,7 +13,7 @@ pub struct XYRect {
     y0: Float,
     y1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl XYRect {
@@ -23,7 +23,7 @@ impl XYRect {
         y0: Float,
         y1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: Box<dyn Material>,
     ) -> XYRect {
         XYRect {
             x0,
@@ -31,7 +31,7 @@ impl XYRect {
             y0,
             y1,
             k,
-            material: Arc::clone(&material),
+            material: material,
         }
     }
 }
@@ -60,7 +60,7 @@ impl Hitable for XYRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -86,7 +86,7 @@ pub struct XZRect {
     z0: Float,
     z1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl XZRect {
@@ -96,7 +96,7 @@ impl XZRect {
         z0: Float,
         z1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: Box<dyn Material>,
     ) -> XZRect {
         XZRect {
             x0,
@@ -104,7 +104,7 @@ impl XZRect {
             z0,
             z1,
             k,
-            material: Arc::clone(&material),
+            material: material,
         }
     }
 }
@@ -133,9 +133,9 @@ impl Hitable for XZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
             u,
             v,
+            material: self.material,
             front_face: false, // TODO: fix having to declare it before calling face_normal
         };
         record.set_face_normal(ray, outward_normal);
@@ -159,7 +159,7 @@ pub struct YZRect {
     z0: Float,
     z1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl YZRect {
@@ -169,7 +169,7 @@ impl YZRect {
         z0: Float,
         z1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: Box<dyn Material>,
     ) -> YZRect {
         YZRect {
             y0,
@@ -177,7 +177,7 @@ impl YZRect {
             z0,
             z1,
             k,
-            material: Arc::clone(&material),
+            material: material,
         }
     }
 }
@@ -206,7 +206,7 @@ impl Hitable for YZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
