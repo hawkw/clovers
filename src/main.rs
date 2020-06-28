@@ -31,7 +31,7 @@ use hitable::{BVHNode, HitRecord, Hitable};
 //     cornell, cornell_with_boxes, glass_spheres, metal_spheres, random_scene,
 //     simple_light_lambertian, simple_light_perlin, two_perlin_spheres, two_spheres,
 // };
-use scenes::cornell_with_boxes;
+use scenes::{cornell_with_boxes, Scene};
 mod perlin;
 mod rect;
 mod texture;
@@ -112,12 +112,12 @@ fn colorize(
 }
 
 /// The main drawing function, returns an `ImageResult`.
-fn draw() -> ImageResult<()> {
+fn draw<'a>() -> ImageResult<()> {
     let mut img: RgbImage = ImageBuffer::new(WIDTH, HEIGHT);
 
     let rng = rand::thread_rng();
-    let scene = cornell_with_boxes::load(rng);
-    let world: BVHNode = scene.world;
+    let scene: Scene<'a> = cornell_with_boxes::load(rng);
+    let world: BVHNode<'a> = scene.world;
     let camera: Camera = scene.camera;
     let background_color: Color = scene.background;
 
