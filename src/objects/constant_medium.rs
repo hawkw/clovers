@@ -6,32 +6,35 @@ use crate::{
     Float, Vec3, CONSTANT_MEDIUM_EPSILON,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
-pub struct ConstantMedium {
-    boundary: Arc<dyn Hitable>,
-    phase_function: Arc<dyn Material>,
+pub struct ConstantMedium<'a> {
+    boundary: &'a dyn Hitable<'a>,
+    phase_function: &'a dyn Material<'a>,
     neg_inv_density: Float,
 }
 
-impl ConstantMedium {
-    pub fn new(boundary: Arc<dyn Hitable>, density: Float, texture: Arc<dyn Texture>) -> Self {
+impl<'a> ConstantMedium<'a> {
+    pub fn new<'b>(
+        boundary: &'a dyn Hitable<'a>,
+        density: Float,
+        material: &'a dyn Material,
+    ) -> ConstantMedium<'a> {
         ConstantMedium {
             boundary,
-            phase_function: Arc::new(Isotropic::new(texture)),
+            phase_function: material,
             neg_inv_density: -1.0 / density,
         }
     }
 }
 
-impl Hitable for ConstantMedium {
+impl<'a> Hitable<'a> for ConstantMedium<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         mut rng: ThreadRng,
-    ) -> Option<crate::hitable::HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let mut rec1: HitRecord;
         let mut rec2: HitRecord;
 
@@ -81,7 +84,7 @@ impl Hitable for ConstantMedium {
 
         let normal: Vec3 = Vec3::new(1.0, 0.0, 0.0); // tutorial says: arbitrary
         let front_face: bool = true; // tutorial says: also arbitrary
-        let material: Arc<dyn Material> = Arc::clone(&self.phase_function);
+        let material = self.phase_function;
 
         let u: Float = 0.5; // TODO: should this be something sensible?
         let v: Float = 0.5; // TODO: should this be something sensible?

@@ -122,8 +122,6 @@ fn draw() -> ImageResult<ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>> {
 
     let rng = rand::thread_rng();
     let scene = scenes::cornell_with_sphere::load(rng);
-    let world: BVHNode = scene.world;
-    let camera: Camera = scene.camera;
     let background_color: Color = scene.background;
 
     img.enumerate_pixels_mut()
@@ -139,8 +137,8 @@ fn draw() -> ImageResult<ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>> {
             for _sample in 0..SAMPLES {
                 u = (x as Float + rng.gen::<Float>()) / WIDTH as Float;
                 v = (y as Float + rng.gen::<Float>()) / HEIGHT as Float;
-                ray = camera.get_ray(u, v, rng);
-                color += colorize(&ray, background_color, &world, 0, rng);
+                ray = scene.camera.get_ray(u, v, rng);
+                color += colorize(&ray, background_color, &scene.world, 0, rng);
             }
             color /= SAMPLES as Float;
 

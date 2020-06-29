@@ -1,13 +1,13 @@
 use super::{random_unit_vector, Material};
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Vec3};
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
+
 #[derive(Clone)]
-pub struct Lambertian {
-    albedo: Arc<dyn Texture>,
+pub struct Lambertian<'a> {
+    albedo: &'a dyn Texture,
 }
 
-impl Material for Lambertian {
+impl<'a> Material<'a> for Lambertian<'a> {
     fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Color)> {
         let scatter_direction: Vec3 = hit_record.normal + random_unit_vector(rng);
         let scattered = Ray::new(hit_record.position, scatter_direction, ray.time);
@@ -26,8 +26,11 @@ impl Material for Lambertian {
     }
 }
 
-impl Lambertian {
-    pub fn new(albedo: Arc<dyn Texture>) -> Self {
+impl<'a> Lambertian<'a> {
+    pub fn new(albedo: &'a dyn Texture) -> Self
+    where
+        Self: 'a,
+    {
         Lambertian { albedo }
     }
 }

@@ -7,7 +7,7 @@ pub struct Dielectric {
     refractive_index: Float,
 }
 
-impl Material for Dielectric {
+impl<'a> Material<'a> for Dielectric {
     fn scatter(
         &self,
         ray: &Ray,

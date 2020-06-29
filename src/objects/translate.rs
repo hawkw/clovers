@@ -4,30 +4,26 @@ use crate::{
     Vec3,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
-pub struct Translate {
-    object: Arc<dyn Hitable>,
+pub struct Translate<'a> {
+    object: &'a dyn Hitable<'a>,
     offset: Vec3,
 }
 
-impl Translate {
-    pub fn new(object: Arc<dyn Hitable>, offset: Vec3) -> Self {
-        Translate {
-            object: Arc::clone(&object),
-            offset,
-        }
+impl<'a> Translate<'a> {
+    pub fn new(object: &'a dyn Hitable<'a>, offset: Vec3) -> Self {
+        Translate { object, offset }
     }
 }
 
-impl Hitable for Translate {
+impl<'a> Hitable<'a> for Translate<'a> {
     fn hit(
         &self,
         ray: &crate::ray::Ray,
         distance_min: crate::Float,
         distance_max: crate::Float,
         rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let moved_ray: Ray = Ray::new(ray.origin - self.offset, ray.direction, ray.time);
 
         match self.object.hit(&moved_ray, distance_min, distance_max, rng) {

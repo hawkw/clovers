@@ -1,12 +1,11 @@
 use super::Material;
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Float, Vec3};
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
-pub struct DiffuseLight {
-    emit: Arc<dyn Texture>,
+pub struct DiffuseLight<'a> {
+    emit: &'a dyn Texture,
 }
 
-impl Material for DiffuseLight {
+impl<'a> Material<'a> for DiffuseLight<'a> {
     fn scatter(
         &self,
         _ray: &Ray,
@@ -20,8 +19,8 @@ impl Material for DiffuseLight {
     }
 }
 
-impl DiffuseLight {
-    pub fn new(emission: Arc<dyn Texture>) -> Self {
+impl<'a> DiffuseLight<'a> {
+    pub fn new(emission: &'a dyn Texture) -> Self {
         DiffuseLight { emit: emission }
     }
 }

@@ -9,7 +9,6 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;

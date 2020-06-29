@@ -1,24 +1,23 @@
 use crate::{hitable::AABB, materials::Material, Float, HitRecord, Hitable, Ray, Vec3, PI};
 use rand::prelude::*;
-use std::sync::Arc;
 
-pub struct MovingSphere {
+pub struct MovingSphere<'a> {
     center_0: Vec3,
     center_1: Vec3,
     time_0: Float,
     time_1: Float,
     radius: Float,
-    material: Arc<dyn Material>,
+    material: &'a dyn Material<'a>,
 }
 
-impl MovingSphere {
+impl<'a> MovingSphere<'a> {
     pub fn new(
         center_0: Vec3,
         center_1: Vec3,
         time_0: Float,
         time_1: Float,
         radius: Float,
-        material: Arc<dyn Material>,
+        material: &'a dyn Material,
     ) -> Self {
         MovingSphere {
             center_0,
@@ -46,14 +45,14 @@ impl MovingSphere {
     }
 }
 
-impl Hitable for MovingSphere {
+impl<'a> Hitable<'a> for MovingSphere<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         _rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let oc = ray.origin - self.center(ray.time);
         let a: Float = ray.direction.norm_squared();
         let half_b: Float = oc.dot(&ray.direction);
@@ -73,7 +72,7 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: Arc::clone(&self.material),
+                    material: self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);
@@ -90,7 +89,7 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: Arc::clone(&self.material),
+                    material: self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);

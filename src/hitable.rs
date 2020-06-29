@@ -2,7 +2,7 @@ use crate::{materials::Material, Float, Ray, Vec3};
 use rand::prelude::*;
 use std::{cmp::Ordering, sync::Arc};
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     /// Distance from the ray origin to the hitpoint
     pub distance: Float,
     /// 3D coordinate of the hitpoint
@@ -14,12 +14,12 @@ pub struct HitRecord {
     /// V surface coordinate of the hitpoint
     pub v: Float,
     /// Reference to the material at the hitpoint
-    pub material: Arc<dyn Material>,
+    pub material: &'a dyn Material<'a>,
     /// Is the hitpoint at the front of the surface
     pub front_face: bool,
 }
 
-impl HitRecord {
+impl<'a> HitRecord<'a> {
     // Helper function for getting normals pointing at the correct direction
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Vec3) {
         self.front_face = ray.direction.dot(&outward_normal) < 0.0;
@@ -31,7 +31,7 @@ impl HitRecord {
     }
 }
 
-pub trait Hitable: Sync + Send {
+pub trait Hitable<'a>: Sync + Send {
     /// The main function for checking whether an object is hit by a ray. If an object is hit, returns Some(HitRecord)
     fn hit(
         &self,
@@ -39,24 +39,24 @@ pub trait Hitable: Sync + Send {
         distance_min: Float,
         distance_max: Float,
         rng: ThreadRng,
-    ) -> Option<HitRecord>;
+    ) -> Option<HitRecord<'a>>;
     fn bounding_box(&self, t0: Float, t1: Float) -> Option<AABB>;
 }
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
-pub struct HitableList {
-    pub hitables: Vec<Arc<dyn Hitable>>,
+pub struct HitableList<'a> {
+    pub hitables: Vec<&'a dyn Hitable<'a>>,
 }
 
-impl Hitable for HitableList {
+impl<'a> Hitable<'a> for HitableList<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         rng: ThreadRng,
-    ) -> Option<HitRecord> {
-        let mut hit_record: Option<HitRecord> = None;
+    ) -> Option<HitRecord<'a>> {
+        let mut hit_record: Option<HitRecord<'a>> = None;
         let mut closest = distance_max;
         for hitable in self.hitables.iter() {
             if let Some(record) = hitable.hit(&ray, distance_min, closest, rng) {
@@ -102,8 +102,8 @@ impl Hitable for HitableList {
     }
 }
 
-impl HitableList {
-    pub fn new() -> HitableList {
+impl<'a> HitableList<'a> {
+    pub fn new() -> HitableList<'a> {
         HitableList {
             hitables: Vec::new(),
         }
@@ -113,7 +113,7 @@ impl HitableList {
     //         self.hitables.push(Box::new(object));
     //     }
 
-    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode {
+    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode<'a> {
         let bvh_node = BVHNode::from_list(self, time_0, time_1, rng);
         bvh_node
     }
@@ -165,15 +165,15 @@ impl AABB {
     }
 }
 
-pub struct BVHNode {
-    left: Arc<dyn Hitable>,
-    right: Arc<dyn Hitable>,
+pub struct BVHNode<'a> {
+    left: &'a dyn Hitable<'a>,
+    right: &'a dyn Hitable<'a>,
     bounding_box: AABB,
 }
 
-impl BVHNode {
+impl<'a> BVHNode<'a> {
     pub fn from_list(
-        objects: HitableList,
+        objects: HitableList<'a>,
         time_0: Float,
         time_1: Float,
         mut rng: ThreadRng,
@@ -187,23 +187,23 @@ impl BVHNode {
 
             let object_span = objects.len();
 
-            let left: Arc<dyn Hitable>;
-            let right: Arc<dyn Hitable>;
+            let left: &'a dyn Hitable<'a>;
+            let right: &'a dyn Hitable<'a>;
 
             if object_span == 1 {
                 // If we only have one object, return itself. Note: no explicit leaf type in our tree
-                left = Arc::clone(&objects[0]);
-                right = Arc::clone(&objects[0]);
+                left = objects[0];
+                right = objects[0];
             } else if object_span == 2 {
                 // If we are comparing two objects, perform the comparison
                 match comparator(&*objects[0], &*objects[1]) {
                     Ordering::Less => {
-                        left = Arc::clone(&objects[0]);
-                        right = Arc::clone(&objects[1]);
+                        left = objects[0];
+                        right = objects[1];
                     }
                     Ordering::Greater => {
-                        left = Arc::clone(&objects[1]);
-                        right = Arc::clone(&objects[0]);
+                        left = objects[1];
+                        right = objects[0];
                     }
                     Ordering::Equal => {
                         // TODO: what should happen here?
@@ -217,20 +217,15 @@ impl BVHNode {
                 // Split the vector; divide and conquer
                 let mid = object_span / 2;
                 let objects_right = objects.split_off(mid);
-                left = Arc::new(BVHNode::from_list(
-                    HitableList { hitables: objects },
-                    time_0,
-                    time_1,
-                    rng,
-                ));
-                right = Arc::new(BVHNode::from_list(
+                left = &BVHNode::from_list(HitableList { hitables: objects }, time_0, time_1, rng);
+                right = &BVHNode::from_list(
                     HitableList {
                         hitables: objects_right,
                     },
                     time_0,
                     time_1,
                     rng,
-                ));
+                );
             }
 
             let box_left = left.bounding_box(time_0, time_1);
@@ -251,14 +246,14 @@ impl BVHNode {
     }
 }
 
-impl Hitable for BVHNode {
+impl<'a> Hitable<'a> for BVHNode<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         match self.bounding_box.hit(ray, distance_min, distance_max) {
             false => None,
             true => {

@@ -5,27 +5,26 @@ use crate::{
     Float, Vec3, RECT_EPSILON,
 };
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
 
 // XY
 
-pub struct XYRect {
+pub struct XYRect<'a> {
     x0: Float,
     x1: Float,
     y0: Float,
     y1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: &'a dyn Material<'a>,
 }
 
-impl XYRect {
+impl<'a> XYRect<'a> {
     pub fn new(
         x0: Float,
         x1: Float,
         y0: Float,
         y1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: &'a dyn Material<'a>,
     ) -> XYRect {
         XYRect {
             x0,
@@ -33,19 +32,19 @@ impl XYRect {
             y0,
             y1,
             k,
-            material: material,
+            material,
         }
     }
 }
 
-impl Hitable for XYRect {
+impl<'a> Hitable<'a> for XYRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         _rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let t = (self.k - ray.origin.z) / ray.direction.z;
         if t < distance_min || t > distance_max {
             return None;
@@ -63,7 +62,7 @@ impl Hitable for XYRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -83,23 +82,23 @@ impl Hitable for XYRect {
 
 // XZ
 
-pub struct XZRect {
+pub struct XZRect<'a> {
     x0: Float,
     x1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: &'a dyn Material<'a>,
 }
 
-impl XZRect {
+impl<'a> XZRect<'a> {
     pub fn new(
         x0: Float,
         x1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: &'a dyn Material<'a>,
     ) -> XZRect {
         XZRect {
             x0,
@@ -107,19 +106,19 @@ impl XZRect {
             z0,
             z1,
             k,
-            material: material,
+            material,
         }
     }
 }
 
-impl Hitable for XZRect {
+impl<'a> Hitable<'a> for XZRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         _rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let t = (self.k - ray.origin.y) / ray.direction.y;
         if t < distance_min || t > distance_max {
             return None;
@@ -137,7 +136,7 @@ impl Hitable for XZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -157,23 +156,23 @@ impl Hitable for XZRect {
 
 // YZ
 
-pub struct YZRect {
+pub struct YZRect<'a> {
     y0: Float,
     y1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Arc<dyn Material>,
+    material: &'a dyn Material<'a>,
 }
 
-impl YZRect {
+impl<'a> YZRect<'a> {
     pub fn new(
         y0: Float,
         y1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Arc<dyn Material>,
+        material: &'a dyn Material<'a>,
     ) -> YZRect {
         YZRect {
             y0,
@@ -181,19 +180,19 @@ impl YZRect {
             z0,
             z1,
             k,
-            material: material,
+            material,
         }
     }
 }
 
-impl Hitable for YZRect {
+impl<'a> Hitable<'a> for YZRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
         _rng: ThreadRng,
-    ) -> Option<HitRecord> {
+    ) -> Option<HitRecord<'a>> {
         let t = (self.k - ray.origin.x) / ray.direction.x;
         if t < distance_min || t > distance_max {
             return None;
@@ -211,7 +210,7 @@ impl Hitable for YZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: Arc::clone(&self.material),
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal

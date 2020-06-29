@@ -1,7 +1,6 @@
 use super::Texture;
 use crate::{color::Color, Float, Vec3};
 
-
 #[derive(Clone)]
 pub struct SolidColor {
     color: Color,

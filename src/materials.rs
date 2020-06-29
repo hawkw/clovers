@@ -12,7 +12,7 @@ pub use isotropic::*;
 pub use lambertian::*;
 pub use metal::*;
 
-pub trait Material: Sync + Send {
+pub trait Material<'a>: Sync + Send + 'a {
     /// Returns `None`, if the ray gets absorbed.
     /// Returns `Some(scattered, attenuation)`, if the ray gets scattered
     fn scatter(&self, ray: &Ray, hit_record: &HitRecord, rng: ThreadRng) -> Option<(Ray, Color)>;

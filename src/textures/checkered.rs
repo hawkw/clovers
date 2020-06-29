@@ -1,28 +1,27 @@
 use super::Texture;
 use crate::{color::Color, Float, Vec3};
 
-use std::sync::Arc;
-pub struct Checkered {
-    even: Arc<dyn Texture>,
-    odd: Arc<dyn Texture>,
+pub struct Checkered<'a> {
+    even: &'a dyn Texture,
+    odd: &'a dyn Texture,
     density: Float,
 }
 
-impl Checkered {
+impl<'a> Checkered<'a> {
     pub fn new(
-        texture1: Arc<dyn Texture>,
-        texture2: Arc<dyn Texture>,
+        texture1: &'a dyn Texture,
+        texture2: &'a dyn Texture,
         density: Float,
-    ) -> Checkered {
+    ) -> Checkered<'a> {
         Checkered {
-            even: Arc::clone(&texture1),
-            odd: Arc::clone(&texture2),
+            even: texture1,
+            odd: texture2,
             density,
         }
     }
 }
 
-impl Texture for Checkered {
+impl<'a> Texture for Checkered<'a> {
     fn color(&self, u: Float, v: Float, position: Vec3) -> Color {
         let sines = (self.density * position.x).sin()
             * (self.density * position.y).sin()
