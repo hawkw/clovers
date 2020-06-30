@@ -25,7 +25,7 @@ impl<'a> XYRect<'a> {
         y1: Float,
         k: Float,
         material: &'a dyn Material<'a>,
-    ) -> XYRect {
+    ) -> XYRect<'a> {
         XYRect {
             x0,
             x1,
@@ -99,7 +99,7 @@ impl<'a> XZRect<'a> {
         z1: Float,
         k: Float,
         material: &'a dyn Material<'a>,
-    ) -> XZRect {
+    ) -> XZRect<'a> {
         XZRect {
             x0,
             x1,
@@ -173,7 +173,7 @@ impl<'a> YZRect<'a> {
         z1: Float,
         k: Float,
         material: &'a dyn Material<'a>,
-    ) -> YZRect {
+    ) -> YZRect<'a> {
         YZRect {
             y0,
             y1,

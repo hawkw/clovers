@@ -7,7 +7,7 @@ pub struct NoiseTexture {
     scale: Float,
 }
 
-impl Texture for NoiseTexture {
+impl<'a> Texture<'a> for NoiseTexture {
     // TODO: investigate why this does not swirl as well as the example marble in tutorial
     fn color(&self, _u: Float, _v: Float, position: Vec3) -> Color {
         let depth = 7;
@@ -18,8 +18,8 @@ impl Texture for NoiseTexture {
     }
 }
 
-impl NoiseTexture {
-    pub fn new(noise: Perlin, scale: Float) -> NoiseTexture {
+impl<'a> NoiseTexture {
+    pub fn new(noise: Perlin, scale: Float) -> dyn Texture<'a> + 'a {
         NoiseTexture { noise, scale }
     }
 }

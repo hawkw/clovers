@@ -13,7 +13,7 @@ use rand::prelude::*;
 pub fn load<'a>(rng: ThreadRng) -> Scene<'a> {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
-    let mut world: HitableList = HitableList::new();
+    let mut world: HitableList<'a> = HitableList::new();
 
     // Cornell box
 
@@ -24,29 +24,29 @@ pub fn load<'a>(rng: ThreadRng) -> Scene<'a> {
 
     world
         .hitables
-        .push(&YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &green));
+        .push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &green)));
     world
         .hitables
-        .push(&YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &red));
+        .push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &red)));
+    world.hitables.push(Box::new(XZRect::new(
+        113.0, 443.0, 127.0, 432.0, 554.0, &light,
+    )));
     world
         .hitables
-        .push(&XZRect::new(113.0, 443.0, 127.0, 432.0, 554.0, &light));
+        .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &white)));
     world
         .hitables
-        .push(&XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &white));
+        .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &white)));
     world
         .hitables
-        .push(&XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &white));
-    world
-        .hitables
-        .push(&XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &white));
+        .push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &white)));
 
     // glass sphere;
-    world.hitables.push(&Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(278.0, 278.0, 278.0),
         120.0,
         &Dielectric::new(1.5),
-    ));
+    )));
 
     let camera_position: Vec3 = Vec3::new(278.0, 278.0, -800.0);
     let camera_target: Vec3 = Vec3::new(278.0, 278.0, 0.0);

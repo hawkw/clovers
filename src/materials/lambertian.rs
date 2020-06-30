@@ -4,7 +4,7 @@ use rand::prelude::ThreadRng;
 
 #[derive(Clone)]
 pub struct Lambertian<'a> {
-    albedo: &'a dyn Texture,
+    albedo: &'a dyn Texture<'a>,
 }
 
 impl<'a> Material<'a> for Lambertian<'a> {
@@ -27,10 +27,7 @@ impl<'a> Material<'a> for Lambertian<'a> {
 }
 
 impl<'a> Lambertian<'a> {
-    pub fn new(albedo: &'a dyn Texture) -> Self
-    where
-        Self: 'a,
-    {
+    pub fn new(albedo: &'a dyn Texture) -> dyn Texture<'a> + 'a {
         Lambertian { albedo }
     }
 }

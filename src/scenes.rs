@@ -28,13 +28,13 @@ pub struct Scene<'a> {
 
 impl<'a> Scene<'a> {
     fn new(
-        world: HitableList,
+        world: HitableList<'a>,
         camera: Camera,
         time_0: Float,
         time_1: Float,
         background: Color,
         rng: ThreadRng,
-    ) -> Scene {
+    ) -> Scene<'a> {
         Scene {
             world: world.into_bvh(time_0, time_1, rng),
             camera,

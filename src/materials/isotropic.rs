@@ -2,14 +2,11 @@ use super::{random_in_unit_sphere, Material};
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture};
 use rand::prelude::ThreadRng;
 pub struct Isotropic<'a> {
-    albedo: &'a dyn Texture,
+    albedo: &'a dyn Texture<'a>,
 }
 
 impl<'a> Isotropic<'a> {
-    pub fn new(emission: &'a dyn Texture) -> Self
-    where
-        Self: 'a,
-    {
+    pub fn new(emission: &'a dyn Texture) -> dyn Material<'a> + 'a {
         Isotropic { albedo: emission }
     }
 }

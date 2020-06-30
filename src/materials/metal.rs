@@ -3,7 +3,7 @@ use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Float
 use rand::prelude::ThreadRng;
 #[derive(Clone)]
 pub struct Metal<'a> {
-    albedo: &'a dyn Texture,
+    albedo: &'a dyn Texture<'a>,
     fuzz: Float,
 }
 
@@ -27,7 +27,7 @@ impl<'a> Material<'a> for Metal<'a> {
 }
 
 impl<'a> Metal<'a> {
-    pub fn new(albedo: &'a dyn Texture, fuzz: Float) -> Self {
+    pub fn new(albedo: &'a dyn Texture, fuzz: Float) -> dyn Texture<'a> + 'a {
         Metal {
             albedo: albedo,
             fuzz: fuzz.min(1.0),

@@ -8,8 +8,6 @@ pub use solid_color::*;
 
 use crate::{color::Color, Float, Vec3};
 
-pub trait Texture: Sync + Send {
+pub trait Texture<'a>: Sync + Send + 'a {
     fn color(&self, u: Float, v: Float, position: Vec3) -> Color;
 }
-
-impl dyn Texture {}

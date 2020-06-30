@@ -6,13 +6,13 @@ pub struct SolidColor {
     color: Color,
 }
 
-impl SolidColor {
-    pub fn new(color: Color) -> SolidColor {
+impl<'a> SolidColor {
+    pub fn new(color: Color) -> dyn Texture<'a> + 'a {
         SolidColor { color }
     }
 }
 
-impl Texture for SolidColor {
+impl<'a> Texture<'a> for SolidColor {
     fn color(&self, _u: Float, _v: Float, _position: Vec3) -> Color {
         self.color
     }

@@ -18,26 +18,26 @@ pub struct Boxy<'a> {
 impl<'a> Boxy<'a> {
     pub fn new(corner_0: Vec3, corner_1: Vec3, material: &'a dyn Material<'a>) -> Boxy<'a> {
         let mut sides = HitableList::new();
-        sides.hitables.push(&XYRect::new(
+        sides.hitables.push(Box::new(XYRect::new(
             corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_1.z, material,
-        ));
-        sides.hitables.push(&XYRect::new(
+        )));
+        sides.hitables.push(Box::new(XYRect::new(
             corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_0.z, material,
-        ));
+        )));
 
-        sides.hitables.push(&XZRect::new(
+        sides.hitables.push(Box::new(XZRect::new(
             corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_1.y, material,
-        ));
-        sides.hitables.push(&XZRect::new(
+        )));
+        sides.hitables.push(Box::new(XZRect::new(
             corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_0.y, material,
-        ));
+        )));
 
-        sides.hitables.push(&YZRect::new(
+        sides.hitables.push(Box::new(YZRect::new(
             corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_1.x, material,
-        ));
-        sides.hitables.push(&YZRect::new(
+        )));
+        sides.hitables.push(Box::new(YZRect::new(
             corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_0.x, material,
-        ));
+        )));
 
         Boxy {
             corner_0,

@@ -2,7 +2,7 @@ use super::Material;
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Float, Vec3};
 use rand::prelude::ThreadRng;
 pub struct DiffuseLight<'a> {
-    emit: &'a dyn Texture,
+    emit: &'a dyn Texture<'a>,
 }
 
 impl<'a> Material<'a> for DiffuseLight<'a> {
@@ -20,7 +20,7 @@ impl<'a> Material<'a> for DiffuseLight<'a> {
 }
 
 impl<'a> DiffuseLight<'a> {
-    pub fn new(emission: &'a dyn Texture) -> Self {
+    pub fn new(emission: &'a dyn Texture) -> dyn Material<'a> {
         DiffuseLight { emit: emission }
     }
 }

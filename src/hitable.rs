@@ -45,7 +45,7 @@ pub trait Hitable<'a>: Sync + Send {
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
 pub struct HitableList<'a> {
-    pub hitables: Vec<&'a dyn Hitable<'a>>,
+    pub hitables: Vec<Box<dyn Hitable<'a>>>,
 }
 
 impl<'a> Hitable<'a> for HitableList<'a> {
@@ -114,7 +114,7 @@ impl<'a> HitableList<'a> {
     //     }
 
     pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode<'a> {
-        let bvh_node = BVHNode::from_list(self, time_0, time_1, rng);
+        let bvh_node = BVHNode::from_list(self.hitables, time_0, time_1, rng);
         bvh_node
     }
 }
@@ -166,29 +166,27 @@ impl AABB {
 }
 
 pub struct BVHNode<'a> {
-    left: &'a dyn Hitable<'a>,
-    right: &'a dyn Hitable<'a>,
+    left: Box<dyn Hitable<'a>>,
+    right: Box<dyn Hitable<'a>>,
     bounding_box: AABB,
 }
 
 impl<'a> BVHNode<'a> {
     pub fn from_list(
-        objects: HitableList<'a>,
+        objects: Vec<Box<dyn Hitable<'a>>>,
         time_0: Float,
         time_1: Float,
         mut rng: ThreadRng,
-    ) -> BVHNode {
+    ) -> BVHNode<'a> {
         {
             let axis: usize = rng.gen_range(0, 2);
             let comparators = [box_x_compare, box_y_compare, box_z_compare];
             let comparator = comparators[axis];
 
-            let mut objects = objects.hitables; // Extract the actual Vec from the HitableList struct
-
             let object_span = objects.len();
 
-            let left: &'a dyn Hitable<'a>;
-            let right: &'a dyn Hitable<'a>;
+            let left: Box<dyn Hitable<'a>>;
+            let right: Box<dyn Hitable<'a>>;
 
             if object_span == 1 {
                 // If we only have one object, return itself. Note: no explicit leaf type in our tree
@@ -217,15 +215,8 @@ impl<'a> BVHNode<'a> {
                 // Split the vector; divide and conquer
                 let mid = object_span / 2;
                 let objects_right = objects.split_off(mid);
-                left = &BVHNode::from_list(HitableList { hitables: objects }, time_0, time_1, rng);
-                right = &BVHNode::from_list(
-                    HitableList {
-                        hitables: objects_right,
-                    },
-                    time_0,
-                    time_1,
-                    rng,
-                );
+                left = Box::new(BVHNode::from_list(objects, time_0, time_1, rng));
+                right = Box::new(BVHNode::from_list(objects_right, time_0, time_1, rng));
             }
 
             let box_left = left.bounding_box(time_0, time_1);
