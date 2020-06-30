@@ -21,6 +21,12 @@ pub fn load(rng: ThreadRng) -> Scene {
     let white: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
         Color::new(0.73, 0.73, 0.73),
     ))));
+    let white2: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.73, 0.73, 0.73),
+    ))));
+    let white3: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.73, 0.73, 0.73),
+    ))));
     let green = Lambertian::new(Box::new(SolidColor::new(Color::new(0.12, 0.45, 0.15))));
     let light = DiffuseLight::new(Box::new(SolidColor::new(Color::new(7.0, 7.0, 7.0))));
 
@@ -53,10 +59,10 @@ pub fn load(rng: ThreadRng) -> Scene {
         .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white)));
     world
         .hitables
-        .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+        .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white2)));
     world
         .hitables
-        .push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+        .push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white3)));
 
     // glass sphere
     let sphere: Box<dyn Hitable> = Box::new(Sphere::new(

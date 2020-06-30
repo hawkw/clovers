@@ -81,29 +81,37 @@ fn colorize(
     match world.hit(&ray, SHADOW_EPSILON, Float::MAX, rng) {
         // Hit an object
         Some(hit_record) => {
-            let emitted: Color =
-                hit_record
+            unsafe {
+                let emitted: Color = hit_record.material.as_ref().unwrap().emitted(
+                    hit_record.u,
+                    hit_record.v,
+                    hit_record.position,
+                );
+                // Try to scatter and colorize the new ray
+                match hit_record
                     .material
-                    .emitted(hit_record.u, hit_record.v, hit_record.position);
-            // Try to scatter and colorize the new ray
-            match hit_record.material.scatter(&ray, &hit_record, rng) {
-                // Got a scatter and attenuation
-                Some((scattered, attenuation)) => {
-                    color = emitted
-                        + attenuation.component_mul(
-                            // Recurse
-                            &colorize(&scattered, background_color, world, depth + 1, rng),
-                        );
+                    .as_ref()
+                    .unwrap()
+                    .scatter(&ray, &hit_record, rng)
+                {
+                    // Got a scatter and attenuation
+                    Some((scattered, attenuation)) => {
+                        color = emitted
+                            + attenuation.component_mul(
+                                // Recurse
+                                &colorize(&scattered, background_color, world, depth + 1, rng),
+                            );
 
-                    // TODO: consider whether you want to clamp here. Pros: avoids overflow. Cons: seems to affect a bunch of things, including lightness, saturation etc...
-                    // let color = Color::new(color.r.min(1.0), color.g.min(1.0), color.b.min(1.0));
-                    // let color = Color::new(color.r.max(0.0), color.g.max(0.0), color.b.max(0.0));
+                        // TODO: consider whether you want to clamp here. Pros: avoids overflow. Cons: seems to affect a bunch of things, including lightness, saturation etc...
+                        // let color = Color::new(color.r.min(1.0), color.g.min(1.0), color.b.min(1.0));
+                        // let color = Color::new(color.r.max(0.0), color.g.max(0.0), color.b.max(0.0));
 
-                    return color;
-                }
-                // No scatter, emit only
-                None => {
-                    return emitted;
+                        return color;
+                    }
+                    // No scatter, emit only
+                    None => {
+                        return emitted;
+                    }
                 }
             }
         }

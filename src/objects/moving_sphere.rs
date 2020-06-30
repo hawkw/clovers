@@ -72,13 +72,14 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: self.material,
+                    material: &self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);
                 return Some(record);
             }
             // Second possible root
+            let distance: Float = (-half_b + root) / a;
             if distance < distance_max && distance > distance_min {
                 let position: Vec3 = ray.point_at_parameter(distance);
                 let outward_normal = (position - self.center(ray.time)) / self.radius;
@@ -89,7 +90,7 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: self.material,
+                    material: &self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);
