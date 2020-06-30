@@ -9,42 +9,41 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world: HitableList = HitableList::new();
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 0.0, -1.0),
         0.5,
-        Arc::new(Lambertian::new(Arc::new(SolidColor::new(Color::new(
+        Box::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
             0.7, 0.3, 0.3,
         ))))),
     )));
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
         100.0,
-        Arc::new(Lambertian::new(Arc::new(SolidColor::new(Color::new(
+        Box::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
             0.8, 0.8, 0.0,
         ))))),
     )));
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(1.0, 0.0, -1.0),
         0.5,
-        Arc::new(Metal::new(
-            Arc::new(SolidColor::new(Color::new(0.8, 0.6, 0.2))),
+        Box::new(Metal::new(
+            Box::new(SolidColor::new(Color::new(0.8, 0.6, 0.2))),
             0.3,
         )),
     )));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(-1.0, 0.0, -1.0),
         0.5,
-        Arc::new(Metal::new(
-            Arc::new(SolidColor::new(Color::new(0.8, 0.8, 0.8))),
+        Box::new(Metal::new(
+            Box::new(SolidColor::new(Color::new(0.8, 0.8, 0.8))),
             1.0,
         )),
     )));

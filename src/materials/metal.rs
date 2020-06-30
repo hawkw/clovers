@@ -1,10 +1,8 @@
 use super::{random_in_unit_sphere, reflect, Material};
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Float, Vec3};
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
-#[derive(Clone)]
 pub struct Metal {
-    albedo: Arc<dyn Texture>,
+    albedo: Box<dyn Texture>,
     fuzz: Float,
 }
 
@@ -28,7 +26,7 @@ impl Material for Metal {
 }
 
 impl Metal {
-    pub fn new(albedo: Arc<dyn Texture>, fuzz: Float) -> Self {
+    pub fn new(albedo: Box<dyn Texture>, fuzz: Float) -> Self {
         Metal {
             albedo: albedo,
             fuzz: fuzz.min(1.0),

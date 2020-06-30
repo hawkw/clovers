@@ -1,6 +1,5 @@
 use crate::{hitable::AABB, materials::Material, Float, HitRecord, Hitable, Ray, Vec3, PI};
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub struct MovingSphere {
     center_0: Vec3,
@@ -8,7 +7,7 @@ pub struct MovingSphere {
     time_0: Float,
     time_1: Float,
     radius: Float,
-    material: Arc<dyn Material>,
+    material: Box<dyn Material>,
 }
 
 impl MovingSphere {
@@ -18,7 +17,7 @@ impl MovingSphere {
         time_0: Float,
         time_1: Float,
         radius: Float,
-        material: Arc<dyn Material>,
+        material: Box<dyn Material>,
     ) -> Self {
         MovingSphere {
             center_0,
@@ -73,7 +72,7 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: Arc::clone(&self.material),
+                    material: self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);
@@ -90,7 +89,7 @@ impl Hitable for MovingSphere {
                     normal: outward_normal,
                     u,
                     v,
-                    material: Arc::clone(&self.material),
+                    material: self.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(ray, outward_normal);

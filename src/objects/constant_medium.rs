@@ -6,19 +6,18 @@ use crate::{
     Float, Vec3, CONSTANT_MEDIUM_EPSILON,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub struct ConstantMedium {
-    boundary: Arc<dyn Hitable>,
-    phase_function: Arc<dyn Material>,
+    boundary: Box<dyn Hitable>,
+    phase_function: Box<dyn Material>,
     neg_inv_density: Float,
 }
 
 impl ConstantMedium {
-    pub fn new(boundary: Arc<dyn Hitable>, density: Float, texture: Arc<dyn Texture>) -> Self {
+    pub fn new(boundary: Box<dyn Hitable>, density: Float, texture: Box<dyn Texture>) -> Self {
         ConstantMedium {
             boundary,
-            phase_function: Arc::new(Isotropic::new(texture)),
+            phase_function: Box::new(Isotropic::new(texture)),
             neg_inv_density: -1.0 / density,
         }
     }
@@ -81,7 +80,7 @@ impl Hitable for ConstantMedium {
 
         let normal: Vec3 = Vec3::new(1.0, 0.0, 0.0); // tutorial says: arbitrary
         let front_face: bool = true; // tutorial says: also arbitrary
-        let material: Arc<dyn Material> = Arc::clone(&self.phase_function);
+        let material: Box<dyn Material> = self.phase_function;
 
         let u: Float = 0.5; // TODO: should this be something sensible?
         let v: Float = 0.5; // TODO: should this be something sensible?

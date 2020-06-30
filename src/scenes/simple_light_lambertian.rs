@@ -10,43 +10,37 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world: HitableList = HitableList::new();
 
-    let texture: Arc<dyn Texture> = Arc::new(SolidColor::new(Color::new(0.3, 0.2, 0.1)));
-    let texture2: Arc<dyn Texture> = Arc::new(SolidColor::new(Color::new(0.1, 0.2, 0.3)));
+    let texture: Box<dyn Texture> = Box::new(SolidColor::new(Color::new(0.3, 0.2, 0.1)));
+    let texture2: Box<dyn Texture> = Box::new(SolidColor::new(Color::new(0.1, 0.2, 0.3)));
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(Lambertian::new(texture)),
+        Box::new(Lambertian::new(texture)),
     )));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 2.0, 0.0),
         2.0,
-        Arc::new(Lambertian::new(texture2)),
+        Box::new(Lambertian::new(texture2)),
     )));
 
-    let difflight: Arc<dyn Material> = Arc::new(DiffuseLight::new(Arc::new(SolidColor::new(
+    let difflight: Box<dyn Material> = Box::new(DiffuseLight::new(Box::new(SolidColor::new(
         Color::new(4.0, 4.0, 4.0),
     ))));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 7.0, 0.0),
         2.0,
-        Arc::clone(&difflight),
+        difflight,
     )));
-    world.hitables.push(Arc::new(XYRect::new(
-        3.0,
-        5.0,
-        1.0,
-        3.0,
-        -2.0,
-        Arc::clone(&difflight),
-    )));
+    world
+        .hitables
+        .push(Box::new(XYRect::new(3.0, 5.0, 1.0, 3.0, -2.0, difflight)));
 
     let camera_position: Vec3 = Vec3::new(20.0, 5.0, 2.0);
     let camera_target: Vec3 = Vec3::new(0.0, 2.0, 0.0);

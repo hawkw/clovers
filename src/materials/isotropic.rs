@@ -1,13 +1,12 @@
 use super::{random_in_unit_sphere, Material};
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture};
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
 pub struct Isotropic {
-    albedo: Arc<dyn Texture>,
+    albedo: Box<dyn Texture>,
 }
 
 impl Isotropic {
-    pub fn new(emission: Arc<dyn Texture>) -> Self {
+    pub fn new(emission: Box<dyn Texture>) -> Self {
         Isotropic { albedo: emission }
     }
 }

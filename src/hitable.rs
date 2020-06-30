@@ -14,7 +14,7 @@ pub struct HitRecord {
     /// V surface coordinate of the hitpoint
     pub v: Float,
     /// Reference to the material at the hitpoint
-    pub material: Arc<dyn Material>,
+    pub material: Box<dyn Material>,
     /// Is the hitpoint at the front of the surface
     pub front_face: bool,
 }
@@ -45,7 +45,7 @@ pub trait Hitable: Sync + Send {
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
 pub struct HitableList {
-    pub hitables: Vec<Arc<dyn Hitable>>,
+    pub hitables: Vec<Box<dyn Hitable>>,
 }
 
 impl Hitable for HitableList {
@@ -166,8 +166,8 @@ impl AABB {
 }
 
 pub struct BVHNode {
-    left: Arc<dyn Hitable>,
-    right: Arc<dyn Hitable>,
+    left: Box<dyn Hitable>,
+    right: Box<dyn Hitable>,
     bounding_box: AABB,
 }
 
@@ -187,23 +187,23 @@ impl BVHNode {
 
             let object_span = objects.len();
 
-            let left: Arc<dyn Hitable>;
-            let right: Arc<dyn Hitable>;
+            let left: Box<dyn Hitable>;
+            let right: Box<dyn Hitable>;
 
             if object_span == 1 {
                 // If we only have one object, return itself. Note: no explicit leaf type in our tree
-                left = Arc::clone(&objects[0]);
-                right = Arc::clone(&objects[0]);
+                left = objects[0];
+                right = objects[0];
             } else if object_span == 2 {
                 // If we are comparing two objects, perform the comparison
                 match comparator(&*objects[0], &*objects[1]) {
                     Ordering::Less => {
-                        left = Arc::clone(&objects[0]);
-                        right = Arc::clone(&objects[1]);
+                        left = objects[0];
+                        right = objects[1];
                     }
                     Ordering::Greater => {
-                        left = Arc::clone(&objects[1]);
-                        right = Arc::clone(&objects[0]);
+                        left = objects[1];
+                        right = objects[0];
                     }
                     Ordering::Equal => {
                         // TODO: what should happen here?
@@ -217,13 +217,13 @@ impl BVHNode {
                 // Split the vector; divide and conquer
                 let mid = object_span / 2;
                 let objects_right = objects.split_off(mid);
-                left = Arc::new(BVHNode::from_list(
+                left = Box::new(BVHNode::from_list(
                     HitableList { hitables: objects },
                     time_0,
                     time_1,
                     rng,
                 ));
-                right = Arc::new(BVHNode::from_list(
+                right = Box::new(BVHNode::from_list(
                     HitableList {
                         hitables: objects_right,
                     },

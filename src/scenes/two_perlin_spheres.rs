@@ -4,7 +4,6 @@ use crate::{
     perlin::Perlin, textures::NoiseTexture, Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;
@@ -15,15 +14,15 @@ pub fn load(rng: ThreadRng) -> Scene {
     let perlin = Perlin::new(256, rng);
     let perlin2 = Perlin::new(256, rng);
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(Lambertian::new(Arc::new(NoiseTexture::new(perlin, 4.0)))),
+        Box::new(Lambertian::new(Box::new(NoiseTexture::new(perlin, 4.0)))),
     )));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 2.0, 0.0),
         2.0,
-        Arc::new(Lambertian::new(Arc::new(NoiseTexture::new(perlin2, 4.0)))),
+        Box::new(Lambertian::new(Box::new(NoiseTexture::new(perlin2, 4.0)))),
     )));
 
     let camera_position: Vec3 = Vec3::new(13.0, 2.0, 3.0);

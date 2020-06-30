@@ -9,23 +9,22 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(mut rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world: HitableList = HitableList::new();
 
-    let ground_color1 = Arc::new(SolidColor::new(Color::new(0.2, 0.3, 0.1)));
-    let ground_color2 = Arc::new(SolidColor::new(Color::new(0.9, 0.9, 0.9)));
+    let ground_color1 = Box::new(SolidColor::new(Color::new(0.2, 0.3, 0.1)));
+    let ground_color2 = Box::new(SolidColor::new(Color::new(0.9, 0.9, 0.9)));
     let ground_texture = Checkered::new(ground_color1, ground_color2, 10.0);
-    let ground_material = Lambertian::new(Arc::new(ground_texture));
+    let ground_material = Lambertian::new(Box::new(ground_texture));
     let ground_sphere = Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(ground_material),
+        Box::new(ground_material),
     );
-    world.hitables.push(Arc::new(ground_sphere));
+    world.hitables.push(Box::new(ground_sphere));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -40,35 +39,35 @@ pub fn load(mut rng: ThreadRng) -> Scene {
                 if choose_mat < 0.8 {
                     // diffuse
                     let color = Color::random(rng);
-                    let texture = Arc::new(SolidColor::new(color));
+                    let texture = Box::new(SolidColor::new(color));
                     let sphere_material = Lambertian::new(texture);
                     let center2 = center + Vec3::new(0.0, rng.gen_range(0.0, 0.5), 0.0);
-                    world.hitables.push(Arc::new(MovingSphere::new(
+                    world.hitables.push(Box::new(MovingSphere::new(
                         center,
                         center2,
                         time_0,
                         time_1,
                         0.2,
-                        Arc::new(sphere_material),
+                        Box::new(sphere_material),
                     )));
                 } else if choose_mat < 0.95 {
                     // metal
                     let color = Color::random(rng);
-                    let texture = Arc::new(SolidColor::new(color));
+                    let texture = Box::new(SolidColor::new(color));
                     let fuzz = rng.gen_range(0.0, 0.5);
                     let sphere_material = Metal::new(texture, fuzz);
-                    world.hitables.push(Arc::new(Sphere::new(
+                    world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(sphere_material),
+                        Box::new(sphere_material),
                     )));
                 } else {
                     // glass
                     let sphere_material = Dielectric::new(1.5);
-                    world.hitables.push(Arc::new(Sphere::new(
+                    world.hitables.push(Box::new(Sphere::new(
                         center,
                         0.2,
-                        Arc::new(sphere_material),
+                        Box::new(sphere_material),
                     )));
                 }
             }
@@ -76,24 +75,24 @@ pub fn load(mut rng: ThreadRng) -> Scene {
     }
 
     let material1 = Dielectric::new(1.5);
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 1.0, 0.0),
         1.0,
-        Arc::new(material1),
+        Box::new(material1),
     )));
 
-    let material2 = Lambertian::new(Arc::new(SolidColor::new(Color::new(0.4, 0.2, 0.1))));
-    world.hitables.push(Arc::new(Sphere::new(
+    let material2 = Lambertian::new(Box::new(SolidColor::new(Color::new(0.4, 0.2, 0.1))));
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(-4.0, 1.0, 0.0),
         1.0,
-        Arc::new(material2),
+        Box::new(material2),
     )));
 
-    let material3 = Metal::new(Arc::new(SolidColor::new(Color::new(0.7, 0.6, 0.5))), 0.0);
-    world.hitables.push(Arc::new(Sphere::new(
+    let material3 = Metal::new(Box::new(SolidColor::new(Color::new(0.7, 0.6, 0.5))), 0.0);
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(4.0, 1.0, 0.0),
         1.0,
-        Arc::new(material3),
+        Box::new(material3),
     )));
 
     let camera_position: Vec3 = Vec3::new(13.0, 2.0, 3.0);

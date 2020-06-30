@@ -1,10 +1,8 @@
 use super::{random_unit_vector, Material};
 use crate::{color::Color, hitable::HitRecord, ray::Ray, textures::Texture, Vec3};
 use rand::prelude::ThreadRng;
-use std::sync::Arc;
-#[derive(Clone)]
 pub struct Lambertian {
-    albedo: Arc<dyn Texture>,
+    albedo: Box<dyn Texture>,
 }
 
 impl Material for Lambertian {
@@ -27,7 +25,7 @@ impl Material for Lambertian {
 }
 
 impl Lambertian {
-    pub fn new(albedo: Arc<dyn Texture>) -> Self {
+    pub fn new(albedo: Box<dyn Texture>) -> Self {
         Lambertian { albedo }
     }
 }

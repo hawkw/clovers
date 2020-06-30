@@ -4,19 +4,15 @@ use crate::{
     Vec3,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub struct Translate {
-    object: Arc<dyn Hitable>,
+    object: Box<dyn Hitable>,
     offset: Vec3,
 }
 
 impl Translate {
-    pub fn new(object: Arc<dyn Hitable>, offset: Vec3) -> Self {
-        Translate {
-            object: Arc::clone(&object),
-            offset,
-        }
+    pub fn new(object: Box<dyn Hitable>, offset: Vec3) -> Self {
+        Translate { object, offset }
     }
 }
 

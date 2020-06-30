@@ -4,17 +4,16 @@ use crate::{
     Float, Vec3,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub struct RotateY {
-    object: Arc<dyn Hitable>,
+    object: Box<dyn Hitable>,
     sin_theta: Float,
     cos_theta: Float,
     bounding_box: Option<AABB>,
 }
 
 impl RotateY {
-    pub fn new(object: Arc<dyn Hitable>, angle: Float) -> RotateY {
+    pub fn new(object: Box<dyn Hitable>, angle: Float) -> RotateY {
         // TODO: add proper time support
         let time_0: Float = 0.0;
         let time_1: Float = 1.0;
@@ -121,7 +120,7 @@ impl Hitable for RotateY {
                     normal,
                     u: 0.0,
                     v: 0.0,
-                    material: Arc::clone(&hit_record.material),
+                    material: hit_record.material,
                     front_face: false, // TODO: fix having to declare it before calling face_normal
                 };
                 record.set_face_normal(&rotated_r, normal);

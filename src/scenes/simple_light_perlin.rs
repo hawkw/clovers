@@ -11,7 +11,6 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 pub fn load(rng: ThreadRng) -> Scene {
     let time_0: Float = 0.0;
@@ -21,33 +20,28 @@ pub fn load(rng: ThreadRng) -> Scene {
     let perlin = Perlin::new(256, rng);
     let perlin2 = Perlin::new(256, rng);
 
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Arc::new(Lambertian::new(Arc::new(NoiseTexture::new(perlin, 4.0)))),
+        Box::new(Lambertian::new(Box::new(NoiseTexture::new(perlin, 4.0)))),
     )));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 2.0, 0.0),
         2.0,
-        Arc::new(Lambertian::new(Arc::new(NoiseTexture::new(perlin2, 4.0)))),
+        Box::new(Lambertian::new(Box::new(NoiseTexture::new(perlin2, 4.0)))),
     )));
 
-    let difflight: Arc<dyn Material> = Arc::new(DiffuseLight::new(Arc::new(SolidColor::new(
+    let difflight: Box<dyn Material> = Box::new(DiffuseLight::new(Box::new(SolidColor::new(
         Color::new(4.0, 4.0, 4.0),
     ))));
-    world.hitables.push(Arc::new(Sphere::new(
+    world.hitables.push(Box::new(Sphere::new(
         Vec3::new(0.0, 7.0, 0.0),
         2.0,
-        Arc::clone(&difflight),
+        difflight,
     )));
-    world.hitables.push(Arc::new(XYRect::new(
-        3.0,
-        5.0,
-        1.0,
-        3.0,
-        -2.0,
-        Arc::clone(&difflight),
-    )));
+    world
+        .hitables
+        .push(Box::new(XYRect::new(3.0, 5.0, 1.0, 3.0, -2.0, difflight)));
 
     let camera_position: Vec3 = Vec3::new(20.0, 5.0, 2.0);
     let camera_target: Vec3 = Vec3::new(0.0, 2.0, 0.0);
