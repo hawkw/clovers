@@ -10,49 +10,73 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-pub fn load<'a>(rng: ThreadRng) -> Box<Scene<'a>> {
+use std::sync::Arc;
+pub fn load<'a>(rng: ThreadRng) -> Scene<'a> {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world: HitableList = HitableList::new();
 
     // Cornell box
 
-    let red: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
-        0.65, 0.05, 0.05,
-    )))));
-    let white: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
-    let white2: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
-    let white3: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
-    let green: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.12, 0.45, 0.15),
-    ))));
-    let light: Box<dyn Material> = Box::new(DiffuseLight::new(Box::new(SolidColor::new(
-        Color::new(7.0, 7.0, 7.0),
-    ))));
-
-    world
-        .hitables
-        .push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, &green)));
-    world
-        .hitables
-        .push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &red)));
-    world.hitables.push(Box::new(XZRect::new(
-        113.0, 443.0, 127.0, 432.0, 554.0, &light,
+    world.hitables.push(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+            0.12, 0.45, 0.15,
+        ))))),
     )));
-    world
-        .hitables
-        .push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, &white)));
+    world.hitables.push(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+            0.65, 0.05, 0.05,
+        ))))),
+    )));
     world.hitables.push(Box::new(XZRect::new(
-        0.0, 555.0, 0.0, 555.0, 555.0, &white2,
+        113.0,
+        443.0,
+        127.0,
+        432.0,
+        554.0,
+        Arc::new(DiffuseLight::new(Box::new(SolidColor::new(Color::new(
+            7.0, 7.0, 7.0,
+        ))))),
+    )));
+    world.hitables.push(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+            0.73, 0.73, 0.73,
+        ))))),
+    )));
+    world.hitables.push(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+            0.73, 0.73, 0.73,
+        ))))),
     )));
     world.hitables.push(Box::new(XYRect::new(
-        0.0, 555.0, 0.0, 555.0, 555.0, &white3,
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+            0.73, 0.73, 0.73,
+        ))))),
     )));
 
     // glass sphere
@@ -83,5 +107,5 @@ pub fn load<'a>(rng: ThreadRng) -> Box<Scene<'a>> {
     );
 
     let background: Color = Color::new(0.0, 0.0, 0.0); // Black background = only lit by the light, no ambient
-    return Box::new(Scene::new(world, camera, time_0, time_1, background, rng));
+    return Scene::new(world, camera, time_0, time_1, background, rng);
 }
