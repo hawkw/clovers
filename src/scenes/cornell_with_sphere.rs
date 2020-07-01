@@ -18,15 +18,9 @@ pub fn load(rng: ThreadRng) -> Scene {
     // Cornell box
 
     let red = Lambertian::new(Box::new(SolidColor::new(Color::new(0.65, 0.05, 0.05))));
-    let white: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
-    let white2: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
-    let white3: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
-        Color::new(0.73, 0.73, 0.73),
-    ))));
+    let white = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
+    let white2 = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
+    let white3 = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
     let green = Lambertian::new(Box::new(SolidColor::new(Color::new(0.12, 0.45, 0.15))));
     let light = DiffuseLight::new(Box::new(SolidColor::new(Color::new(7.0, 7.0, 7.0))));
 
