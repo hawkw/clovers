@@ -5,20 +5,21 @@ use crate::{
     Float,
 };
 use rand::prelude::*;
+use std::marker::PhantomData;
 
-pub mod cornell;
-pub mod cornell_with_boxes;
-pub mod cornell_with_smoke;
+// pub mod cornell;
+// pub mod cornell_with_boxes;
+// pub mod cornell_with_smoke;
 pub mod cornell_with_sphere;
-pub mod cornell_with_subsurface_sphere;
-pub mod final_scene;
-pub mod glass_spheres;
-pub mod metal_spheres;
-pub mod random_scene;
-pub mod simple_light_lambertian;
-pub mod simple_light_perlin;
-pub mod two_perlin_spheres;
-pub mod two_spheres;
+// pub mod cornell_with_subsurface_sphere;
+// pub mod final_scene;
+// pub mod glass_spheres;
+// pub mod metal_spheres;
+// pub mod random_scene;
+// pub mod simple_light_lambertian;
+// pub mod simple_light_perlin;
+// pub mod two_perlin_spheres;
+// pub mod two_spheres;
 
 pub struct Scene {
     pub world: BVHNode,
@@ -26,7 +27,7 @@ pub struct Scene {
     pub background: Color, // TODO: make into Texture or something?
 }
 
-impl Scene {
+impl<'a> Scene {
     fn new(
         world: HitableList,
         camera: Camera,
