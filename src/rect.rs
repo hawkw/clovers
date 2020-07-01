@@ -9,24 +9,24 @@ use std::sync::Arc;
 
 // XY
 
-pub struct XYRect {
+pub struct XYRect<'a> {
     x0: Float,
     x1: Float,
     y0: Float,
     y1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl XYRect {
+impl<'a> XYRect<'a> {
     pub fn new(
         x0: Float,
         x1: Float,
         y0: Float,
         y1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> XYRect {
+        material: &'a dyn Material,
+    ) -> XYRect<'a> {
         XYRect {
             x0,
             x1,
@@ -38,7 +38,7 @@ impl XYRect {
     }
 }
 
-impl Hitable for XYRect {
+impl<'a> Hitable for XYRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
@@ -63,7 +63,7 @@ impl Hitable for XYRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: &self.material,
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -83,24 +83,24 @@ impl Hitable for XYRect {
 
 // XZ
 
-pub struct XZRect {
+pub struct XZRect<'a> {
     x0: Float,
     x1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl XZRect {
+impl<'a> XZRect<'a> {
     pub fn new(
         x0: Float,
         x1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> XZRect {
+        material: &'a dyn Material,
+    ) -> XZRect<'a> {
         XZRect {
             x0,
             x1,
@@ -112,7 +112,7 @@ impl XZRect {
     }
 }
 
-impl Hitable for XZRect {
+impl<'a> Hitable for XZRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
@@ -137,7 +137,7 @@ impl Hitable for XZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: &self.material,
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -157,24 +157,24 @@ impl Hitable for XZRect {
 
 // YZ
 
-pub struct YZRect {
+pub struct YZRect<'a> {
     y0: Float,
     y1: Float,
     z0: Float,
     z1: Float,
     k: Float,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl YZRect {
+impl<'a> YZRect<'a> {
     pub fn new(
         y0: Float,
         y1: Float,
         z0: Float,
         z1: Float,
         k: Float,
-        material: Box<dyn Material>,
-    ) -> YZRect {
+        material: &'a dyn Material,
+    ) -> YZRect<'a> {
         YZRect {
             y0,
             y1,
@@ -186,7 +186,7 @@ impl YZRect {
     }
 }
 
-impl Hitable for YZRect {
+impl<'a> Hitable for YZRect<'a> {
     fn hit(
         &self,
         ray: &Ray,
@@ -211,7 +211,7 @@ impl Hitable for YZRect {
             distance: t,
             position,
             normal: outward_normal,
-            material: &self.material,
+            material: self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal

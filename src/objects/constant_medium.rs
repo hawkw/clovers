@@ -90,7 +90,7 @@ impl Hitable for ConstantMedium {
             normal,
             u,
             v,
-            material: &self.phase_function,
+            material: &*self.phase_function,
             front_face,
         })
     }

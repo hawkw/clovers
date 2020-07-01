@@ -6,49 +6,50 @@ use crate::{
     Float, Vec3,
 };
 use rand::prelude::*;
+use std::sync::Arc;
 
 // Avoid keyword clash
-pub struct Boxy {
+pub struct Boxy<'a> {
     corner_0: Vec3,
     corner_1: Vec3,
     sides: HitableList,
-    material: Box<dyn Material>,
+    material: &'a dyn Material,
 }
 
-impl Boxy {
-    pub fn new(corner_0: Vec3, corner_1: Vec3, material: Box<dyn Material>) -> Boxy {
+impl<'a> Boxy<'a> {
+    pub fn new(corner_0: Vec3, corner_1: Vec3, material: Box<dyn Material>) -> Boxy<'a> {
         let mut sides = HitableList::new();
         sides.hitables.push(Box::new(XYRect::new(
-            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_1.z, material,
+            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_1.z, &*material,
         )));
         sides.hitables.push(Box::new(XYRect::new(
-            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_0.z, material,
+            corner_0.x, corner_1.x, corner_0.y, corner_1.y, corner_0.z, &*material,
         )));
 
         sides.hitables.push(Box::new(XZRect::new(
-            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_1.y, material,
+            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_1.y, &*material,
         )));
         sides.hitables.push(Box::new(XZRect::new(
-            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_0.y, material,
+            corner_0.x, corner_1.x, corner_0.z, corner_1.z, corner_0.y, &*material,
         )));
 
         sides.hitables.push(Box::new(YZRect::new(
-            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_1.x, material,
+            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_1.x, &*material,
         )));
         sides.hitables.push(Box::new(YZRect::new(
-            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_0.x, material,
+            corner_0.y, corner_1.y, corner_0.z, corner_1.z, corner_0.x, &*material,
         )));
 
         Boxy {
             corner_0,
             corner_1,
             sides,
-            material,
+            material: &*material,
         }
     }
 }
 
-impl Hitable for Boxy {
+impl<'a> Hitable for Boxy<'a> {
     fn hit(
         &self,
         ray: &Ray,
