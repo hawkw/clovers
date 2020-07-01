@@ -21,21 +21,21 @@ pub mod cornell_with_sphere;
 // pub mod two_perlin_spheres;
 // pub mod two_spheres;
 
-pub struct Scene {
-    pub world: BVHNode,
+pub struct Scene<'a> {
+    pub world: BVHNode<'a>,
     pub camera: Camera,
     pub background: Color, // TODO: make into Texture or something?
 }
 
-impl<'a> Scene {
+impl<'a> Scene<'a> {
     fn new(
-        world: HitableList,
+        world: HitableList<'a>,
         camera: Camera,
         time_0: Float,
         time_1: Float,
         background: Color,
         rng: ThreadRng,
-    ) -> Scene {
+    ) -> Scene<'a> {
         Scene {
             world: world.into_bvh(time_0, time_1, rng),
             camera,

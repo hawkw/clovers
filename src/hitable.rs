@@ -44,11 +44,11 @@ pub trait Hitable: Sync + Send {
 }
 
 /// Helper struct for storing multiple `Hitable` objects. This list has a `Hitable` implementation too, returning the closest possible hit
-pub struct HitableList {
-    pub hitables: Vec<Box<dyn Hitable>>,
+pub struct HitableList<'a> {
+    pub hitables: Vec<Box<dyn Hitable + 'a>>,
 }
 
-impl Hitable for HitableList {
+impl<'a> Hitable for HitableList<'a> {
     fn hit(
         &self,
         ray: &Ray,
@@ -102,8 +102,8 @@ impl Hitable for HitableList {
     }
 }
 
-impl HitableList {
-    pub fn new() -> HitableList {
+impl<'a> HitableList<'a> {
+    pub fn new() -> HitableList<'a> {
         HitableList {
             hitables: Vec::new(),
         }
@@ -113,7 +113,7 @@ impl HitableList {
     //         self.hitables.push(Box::new(object));
     //     }
 
-    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode {
+    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> BVHNode<'a> {
         let bvh_node = BVHNode::from_list(self, time_0, time_1, rng);
         bvh_node
     }
@@ -165,19 +165,19 @@ impl AABB {
     }
 }
 
-pub struct BVHNode {
-    left: Option<Box<dyn Hitable>>,
-    right: Option<Box<dyn Hitable>>,
+pub struct BVHNode<'a> {
+    left: Option<Box<dyn Hitable + 'a>>,
+    right: Option<Box<dyn Hitable + 'a>>,
     bounding_box: AABB,
 }
 
-impl BVHNode {
+impl<'a> BVHNode<'a> {
     pub fn from_list(
-        objects: HitableList,
+        objects: HitableList<'a>,
         time_0: Float,
         time_1: Float,
         mut rng: ThreadRng,
-    ) -> BVHNode {
+    ) -> BVHNode<'a> {
         {
             let axis: usize = rng.gen_range(0, 2);
             let comparators = [box_x_compare, box_y_compare, box_z_compare];
@@ -267,7 +267,7 @@ impl BVHNode {
     }
 }
 
-impl Hitable for BVHNode {
+impl<'a> Hitable for BVHNode<'a> {
     fn hit(
         &self,
         ray: &Ray,

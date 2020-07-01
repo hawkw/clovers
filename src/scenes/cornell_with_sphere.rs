@@ -10,19 +10,31 @@ use crate::{
     Float, Vec3, HEIGHT, WIDTH,
 };
 use rand::prelude::*;
-pub fn load(rng: ThreadRng) -> Scene {
+pub fn load<'a>(rng: ThreadRng) -> Box<Scene<'a>> {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world: HitableList = HitableList::new();
 
     // Cornell box
 
-    let red = Lambertian::new(Box::new(SolidColor::new(Color::new(0.65, 0.05, 0.05))));
-    let white = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
-    let white2 = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
-    let white3 = Lambertian::new(Box::new(SolidColor::new(Color::new(0.73, 0.73, 0.73))));
-    let green = Lambertian::new(Box::new(SolidColor::new(Color::new(0.12, 0.45, 0.15))));
-    let light = DiffuseLight::new(Box::new(SolidColor::new(Color::new(7.0, 7.0, 7.0))));
+    let red: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(Color::new(
+        0.65, 0.05, 0.05,
+    )))));
+    let white: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.73, 0.73, 0.73),
+    ))));
+    let white2: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.73, 0.73, 0.73),
+    ))));
+    let white3: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.73, 0.73, 0.73),
+    ))));
+    let green: Box<dyn Material> = Box::new(Lambertian::new(Box::new(SolidColor::new(
+        Color::new(0.12, 0.45, 0.15),
+    ))));
+    let light: Box<dyn Material> = Box::new(DiffuseLight::new(Box::new(SolidColor::new(
+        Color::new(7.0, 7.0, 7.0),
+    ))));
 
     world
         .hitables
@@ -71,5 +83,5 @@ pub fn load(rng: ThreadRng) -> Scene {
     );
 
     let background: Color = Color::new(0.0, 0.0, 0.0); // Black background = only lit by the light, no ambient
-    Scene::new(world, camera, time_0, time_1, background, rng)
+    return Box::new(Scene::new(world, camera, time_0, time_1, background, rng));
 }

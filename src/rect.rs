@@ -15,7 +15,7 @@ pub struct XYRect<'a> {
     y0: Float,
     y1: Float,
     k: Float,
-    material: &'a dyn Material,
+    material: &'a Box<dyn Material>,
 }
 
 impl<'a> XYRect<'a> {
@@ -25,7 +25,7 @@ impl<'a> XYRect<'a> {
         y0: Float,
         y1: Float,
         k: Float,
-        material: &'a dyn Material,
+        material: &'a Box<dyn Material>,
     ) -> XYRect<'a> {
         XYRect {
             x0,
@@ -63,7 +63,7 @@ impl<'a> Hitable for XYRect<'a> {
             distance: t,
             position,
             normal: outward_normal,
-            material: self.material,
+            material: &**self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -89,7 +89,7 @@ pub struct XZRect<'a> {
     z0: Float,
     z1: Float,
     k: Float,
-    material: &'a dyn Material,
+    material: &'a Box<dyn Material>,
 }
 
 impl<'a> XZRect<'a> {
@@ -99,7 +99,7 @@ impl<'a> XZRect<'a> {
         z0: Float,
         z1: Float,
         k: Float,
-        material: &'a dyn Material,
+        material: &'a Box<dyn Material>,
     ) -> XZRect<'a> {
         XZRect {
             x0,
@@ -137,7 +137,7 @@ impl<'a> Hitable for XZRect<'a> {
             distance: t,
             position,
             normal: outward_normal,
-            material: self.material,
+            material: &**self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
@@ -163,7 +163,7 @@ pub struct YZRect<'a> {
     z0: Float,
     z1: Float,
     k: Float,
-    material: &'a dyn Material,
+    material: &'a Box<dyn Material>,
 }
 
 impl<'a> YZRect<'a> {
@@ -173,7 +173,7 @@ impl<'a> YZRect<'a> {
         z0: Float,
         z1: Float,
         k: Float,
-        material: &'a dyn Material,
+        material: &'a Box<dyn Material>,
     ) -> YZRect<'a> {
         YZRect {
             y0,
@@ -211,7 +211,7 @@ impl<'a> Hitable for YZRect<'a> {
             distance: t,
             position,
             normal: outward_normal,
-            material: self.material,
+            material: &**self.material,
             u,
             v,
             front_face: false, // TODO: fix having to declare it before calling face_normal
