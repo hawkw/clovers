@@ -166,8 +166,8 @@ impl AABB {
 }
 
 pub struct BVHNode {
-    left: Box<dyn Hitable>,
-    right: Box<dyn Hitable>,
+    left: Option<Box<dyn Hitable>>,
+    right: Option<Box<dyn Hitable>>,
     bounding_box: AABB,
 }
 
@@ -187,23 +187,25 @@ impl BVHNode {
 
             let object_span = objects.len();
 
-            let left: Box<dyn Hitable>;
-            let right: Box<dyn Hitable>;
+            let left: Option<Box<dyn Hitable>>;
+            let right: Option<Box<dyn Hitable>>;
 
             if object_span == 1 {
                 // If we only have one object, return itself. Note: no explicit leaf type in our tree
-                left = objects[0];
-                right = objects[0];
+                left = Some(objects.remove(0));
+                right = None
             } else if object_span == 2 {
                 // If we are comparing two objects, perform the comparison
                 match comparator(&*objects[0], &*objects[1]) {
                     Ordering::Less => {
-                        left = objects[0];
-                        right = objects[1];
+                        // less? left first
+                        left = Some(objects.remove(0));
+                        right = Some(objects.remove(0));
                     }
                     Ordering::Greater => {
-                        left = objects[1];
-                        right = objects[0];
+                        // greater? right first
+                        right = Some(objects.remove(0));
+                        left = Some(objects.remove(0));
                     }
                     Ordering::Equal => {
                         // TODO: what should happen here?
@@ -217,24 +219,38 @@ impl BVHNode {
                 // Split the vector; divide and conquer
                 let mid = object_span / 2;
                 let objects_right = objects.split_off(mid);
-                left = Box::new(BVHNode::from_list(
+                left = Some(Box::new(BVHNode::from_list(
                     HitableList { hitables: objects },
                     time_0,
                     time_1,
                     rng,
-                ));
-                right = Box::new(BVHNode::from_list(
+                )));
+                right = Some(Box::new(BVHNode::from_list(
                     HitableList {
                         hitables: objects_right,
                     },
                     time_0,
                     time_1,
                     rng,
-                ));
+                )));
             }
 
-            let box_left = left.bounding_box(time_0, time_1);
-            let box_right = right.bounding_box(time_0, time_1);
+            let box_left: Option<AABB>;
+            let box_right: Option<AABB>;
+
+            match &left {
+                Some(lbox) => {
+                    box_left = lbox.bounding_box(time_0, time_1);
+                }
+                None => box_left = None,
+            }
+
+            match &right {
+                Some(rbox) => {
+                    box_right = rbox.bounding_box(time_0, time_1);
+                }
+                None => box_right = None,
+            }
 
             if box_left.is_none() || box_right.is_none() {
                 panic!("No bounding box in bvh_node constructor");
@@ -262,8 +278,22 @@ impl Hitable for BVHNode {
         match self.bounding_box.hit(ray, distance_min, distance_max) {
             false => None,
             true => {
-                let hit_left = self.left.hit(ray, distance_min, distance_max, rng);
-                let hit_right = self.right.hit(ray, distance_min, distance_max, rng);
+                let hit_left: Option<HitRecord>;
+                let hit_right: Option<HitRecord>;
+
+                match &self.left {
+                    Some(left) => {
+                        hit_left = left.hit(ray, distance_min, distance_max, rng);
+                    }
+                    None => hit_left = None,
+                }
+
+                match &self.right {
+                    Some(right) => {
+                        hit_right = right.hit(ray, distance_min, distance_max, rng);
+                    }
+                    None => hit_right = None,
+                }
 
                 match &hit_left {
                     Some(left) => {
