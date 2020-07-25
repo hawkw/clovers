@@ -25,6 +25,7 @@ impl<'a> DiffuseLight {
         _scattered: &Ray,
         _rng: ThreadRng,
     ) -> Float {
+        dbg!();
         0.0 // TODO: cleanup
     }
 
@@ -37,7 +38,17 @@ impl<'a> DiffuseLight {
         position: Vec3,
     ) -> Color {
         if hit_record.front_face {
-            self.emit.color(u, v, position)
+            let color = self.emit.color(u, v, position);
+            if color.r.is_nan() {
+                dbg!("color.r was NaN");
+            }
+            if color.g.is_nan() {
+                dbg!("color.g was NaN");
+            }
+            if color.b.is_nan() {
+                dbg!("color.b was NaN");
+            }
+            color
         } else {
             Color::new(0.0, 0.0, 0.0)
         }

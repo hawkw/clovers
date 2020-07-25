@@ -10,6 +10,7 @@ use rand::prelude::*;
 
 use std::{cmp::Ordering, sync::Arc};
 
+#[derive(Debug)]
 pub struct HitRecord<'a> {
     /// Distance from the ray origin to the hitpoint
     pub distance: Float,
@@ -188,10 +189,31 @@ impl HitableList {
     }
     pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: ThreadRng) -> Float {
         let weight = 1.0 / self.0.len() as Float;
+        if weight.is_nan() {
+            dbg!(weight, "weight is NaN");
+        }
         let mut sum = 0.0;
 
         self.0.iter().for_each(|object| {
-            sum += weight * object.pdf_value(origin, vector, time, rng);
+            let value = object.pdf_value(origin, vector, time, rng);
+            if value.is_nan() {
+                dbg!(&value);
+                match **object {
+                    Hitable::Boxy(_) => dbg!("Boxy.value returned NaN"),
+                    Hitable::ConstantMedium(_) => dbg!("ConstantMedium.value returned NaN"),
+                    Hitable::MovingSphere(_) => dbg!("MovingSphere.value returned NaN"),
+                    Hitable::XZRect(_) => dbg!("XZRect.value returned NaN"),
+                    Hitable::XYRect(_) => dbg!("XYRect.value returned NaN"),
+                    Hitable::YZRect(_) => dbg!("YZRect.value returned NaN"),
+                    Hitable::RotateY(_) => dbg!("RotateY.value returned NaN"),
+                    Hitable::Sphere(_) => dbg!("Sphere.value returned NaN"),
+                    Hitable::Translate(_) => dbg!("Translate.value returned NaN"),
+                    Hitable::BVHNode(_) => dbg!("BVHNode.value returned NaN"),
+                    Hitable::HitableList(_) => dbg!("HitableList.value returned NaN"),
+                    Hitable::FlipFace(_) => dbg!("FlipFace.value returned NaN"),
+                };
+            }
+            sum += weight * value;
         });
 
         sum

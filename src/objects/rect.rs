@@ -46,7 +46,7 @@ impl XYRect {
         _rng: ThreadRng,
     ) -> Option<HitRecord> {
         let t = (self.k - ray.origin.z) / ray.direction.z;
-        if t < distance_min || t > distance_max {
+        if t < distance_min || t > distance_max || t.is_nan() {
             return None;
         }
         let x = ray.origin.x + t * ray.direction.x;
@@ -83,7 +83,7 @@ impl XYRect {
         match self.hit(
             &Ray::new(origin, vector, time),
             SHADOW_EPSILON,
-            Float::INFINITY,
+            Float::MAX,
             rng,
         ) {
             Some(hit_record) => {
@@ -147,7 +147,7 @@ impl XZRect {
         _rng: ThreadRng,
     ) -> Option<HitRecord> {
         let t = (self.k - ray.origin.y) / ray.direction.y;
-        if t < distance_min || t > distance_max {
+        if t < distance_min || t > distance_max || t.is_nan() {
             return None;
         }
         let x = ray.origin.x + t * ray.direction.x;
@@ -184,16 +184,34 @@ impl XZRect {
         match self.hit(
             &Ray::new(origin, vector, time),
             SHADOW_EPSILON,
-            Float::INFINITY,
+            Float::MAX,
             rng,
         ) {
             Some(hit_record) => {
                 let area = (self.x1 - self.x0) * (self.z1 - self.z0); // NOTE: should this have an abs()?
+                if area.is_nan() {
+                    dbg!(area);
+                }
+                if vector.norm_squared().is_nan() {
+                    dbg!(vector);
+                }
+                if hit_record.distance.is_nan() {
+                    dbg!(&hit_record);
+                }
                 let distance_squared =
                     hit_record.distance * hit_record.distance * vector.norm_squared();
+                if distance_squared.is_nan() {
+                    dbg!(distance_squared);
+                }
                 let cosine = vector.dot(&hit_record.normal).abs() / vector.norm();
-
-                distance_squared / (cosine * area)
+                if cosine.is_nan() {
+                    dbg!(cosine);
+                }
+                let value = distance_squared / (cosine * area);
+                if value.is_nan() {
+                    dbg!(value);
+                }
+                value
             }
             None => 0.0,
         }
@@ -248,7 +266,7 @@ impl YZRect {
         _rng: ThreadRng,
     ) -> Option<HitRecord> {
         let t = (self.k - ray.origin.x) / ray.direction.x;
-        if t < distance_min || t > distance_max {
+        if t < distance_min || t > distance_max || t.is_nan() {
             return None;
         }
         let y = ray.origin.y + t * ray.direction.y;
@@ -285,7 +303,7 @@ impl YZRect {
         match self.hit(
             &Ray::new(origin, vector, time),
             SHADOW_EPSILON,
-            Float::INFINITY,
+            Float::MAX,
             rng,
         ) {
             Some(hit_record) => {

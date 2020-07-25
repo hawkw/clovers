@@ -39,6 +39,16 @@ pub fn draw(
                 v = (y as Float + rng.gen::<Float>()) / height as Float;
                 ray = scene.camera.get_ray(u, v, rng);
                 color += colorize(&ray, &scene, 0, max_depth, rng);
+                // DEBUG
+                // if color.r.is_nan() {
+                //     println!("color.r was NaN")
+                // }
+                // if color.g.is_nan() {
+                //     println!("color.g was NaN")
+                // }
+                // if color.b.is_nan() {
+                //     println!("color.b was NaN")
+                // }
             }
             color /= samples as Float;
 

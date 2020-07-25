@@ -41,11 +41,17 @@ impl<'a> CosinePDF {
 
     pub fn value(&self, direction: Vec3, _time: Float, _rng: ThreadRng) -> Float {
         let cosine = direction.normalize().dot(&self.uvw.w);
+        let pdf_value: Float;
         if cosine <= 0.0 {
-            0.0
+            pdf_value = 0.0;
         } else {
-            cosine / PI
+            pdf_value = cosine / PI;
         }
+        // DEBUG
+        if pdf_value.is_nan() {
+            println!("CosinePDF::value was NaN");
+        }
+        pdf_value
     }
 
     pub fn generate(&self, rng: ThreadRng) -> Vec3 {
@@ -64,7 +70,25 @@ impl<'a> HitablePDF<'a> {
     }
 
     pub fn value(&self, direction: Vec3, time: Float, rng: ThreadRng) -> Float {
-        self.hitable.pdf_value(self.origin, direction, time, rng)
+        let value = self.hitable.pdf_value(self.origin, direction, time, rng);
+        if value.is_nan() {
+            dbg!(&value);
+            match self.hitable {
+                Hitable::Boxy(_) => println!("Boxy.value returned NaN"),
+                Hitable::ConstantMedium(_) => println!("ConstantMedium.value returned NaN"),
+                Hitable::MovingSphere(_) => println!("MovingSphere.value returned NaN"),
+                Hitable::XZRect(_) => println!("XZRect.value returned NaN"),
+                Hitable::XYRect(_) => println!("XYRect.value returned NaN"),
+                Hitable::YZRect(_) => println!("YZRect.value returned NaN"),
+                Hitable::RotateY(_) => println!("RotateY.value returned NaN"),
+                Hitable::Sphere(_) => println!("Sphere.value returned NaN"),
+                Hitable::Translate(_) => println!("Translate.value returned NaN"),
+                Hitable::BVHNode(_) => println!("BVHNode.value returned NaN"),
+                Hitable::HitableList(_) => println!("HitableList.value returned NaN"),
+                Hitable::FlipFace(_) => println!("FlipFace.value returned NaN"),
+            };
+        }
+        value
     }
 
     pub fn generate(&self, rng: ThreadRng) -> Vec3 {
@@ -87,7 +111,12 @@ impl<'a> MixturePDF<'a> {
     }
 
     pub fn value(&self, direction: Vec3, time: Float, rng: ThreadRng) -> Float {
-        0.5 * self.pdf1.value(direction, time, rng) + 0.5 * self.pdf2.value(direction, time, rng)
+        let value = 0.5 * self.pdf1.value(direction, time, rng)
+            + 0.5 * self.pdf2.value(direction, time, rng);
+        if value.is_nan() {
+            dbg!(&value);
+        }
+        value
     }
 
     pub fn generate(&self, mut rng: ThreadRng) -> Vec3 {

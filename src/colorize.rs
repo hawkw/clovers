@@ -6,7 +6,6 @@ use crate::{
     Float, SHADOW_EPSILON,
 };
 use rand::prelude::*;
-use std::sync::Arc;
 
 /// The main coloring function
 pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: ThreadRng) -> Color {
@@ -30,6 +29,17 @@ pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: Threa
                 hit_record.position,
             );
 
+            // DEBUG
+            if emitted.r.is_nan() {
+                println!("emitted.r was NaN");
+            }
+            if emitted.g.is_nan() {
+                println!("emitted.g was NaN");
+            }
+            if emitted.b.is_nan() {
+                println!("emitted.b was NaN");
+            }
+
             // Do we scatter?
             match hit_record.material.scatter(&ray, &hit_record, rng) {
                 // No scatter, emit only
@@ -39,14 +49,25 @@ pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: Threa
                     match scatter_record.material_type {
                         // If we hit a specular, return a specular ray
                         crate::materials::MaterialType::Specular => {
-                            scatter_record.attenuation
-                                * colorize(
-                                    &scatter_record.specular_ray.unwrap(), // should always have a ray at this point
-                                    scene,
-                                    depth + 1,
-                                    max_depth,
-                                    rng,
-                                )
+                            let recurse = colorize(
+                                &scatter_record.specular_ray.unwrap(), // should always have a ray at this point
+                                scene,
+                                depth + 1,
+                                max_depth,
+                                rng,
+                            );
+                            // DEBUG
+                            if recurse.r.is_nan() {
+                                println!("recurse.r was NaN")
+                            }
+                            if recurse.g.is_nan() {
+                                println!("recurse.g was NaN")
+                            }
+                            if recurse.b.is_nan() {
+                                println!("recurse.b was NaN")
+                            }
+
+                            scatter_record.attenuation * recurse
                         }
                         crate::materials::MaterialType::Diffuse => {
                             // Use a probability density function to figure out where to scatter a new ray
@@ -56,22 +77,62 @@ pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: Threa
 
                             let scattered =
                                 Ray::new(hit_record.position, mixture_pdf.generate(rng), ray.time);
+                            // DEBUG
+                            if scattered.direction.x.is_nan() {
+                                println!("scattered.direction.x was NaN");
+                            }
+                            if scattered.direction.y.is_nan() {
+                                println!("scattered.direction.y was NaN");
+                            }
+                            if scattered.direction.z.is_nan() {
+                                println!("scattered.direction.z was NaN");
+                            }
+
                             let pdf_val = mixture_pdf.value(scattered.direction, ray.time, rng);
+                            // DEBUG
+                            if pdf_val.is_nan() {
+                                println!("pdf_val was NaN"); // TODO: seems to be at least one of the NaN sources
+                            }
 
                             // recurse
                             let recurse = colorize(&scattered, scene, depth + 1, max_depth, rng);
 
+                            // DEBUG
+                            // if recurse.r.is_nan() {
+                            //     println!("recurse.r was NaN")
+                            // }
+                            // if recurse.g.is_nan() {
+                            //     println!("recurse.g was NaN")
+                            // }
+                            // if recurse.b.is_nan() {
+                            //     println!("recurse.b was NaN")
+                            // }
+
+                            // DEBUG
+                            if scatter_record.attenuation.r.is_nan() {
+                                println!("scatter_record.attenuation.r was NaN")
+                            }
+                            if scatter_record.attenuation.g.is_nan() {
+                                println!("scatter_record.attenuation.g was NaN")
+                            }
+                            if scatter_record.attenuation.b.is_nan() {
+                                println!("scatter_record.attenuation.b was NaN")
+                            }
+
+                            let scattering_pdf = hit_record.material.scattering_pdf(
+                                ray,
+                                &hit_record,
+                                &scattered,
+                                rng,
+                            );
+                            // DEBUG
+                            if scattering_pdf.is_nan() {
+                                println!("scattering_pdf was NaN")
+                            }
+
                             // Blend it all together
                             emitted
-                                + scatter_record.attenuation
-                                    * hit_record.material.scattering_pdf(
-                                        ray,
-                                        &hit_record,
-                                        &scattered,
-                                        rng,
-                                    )
-                                    * recurse
-                                    / pdf_val
+                                + scatter_record.attenuation * scattering_pdf * recurse / pdf_val
                         }
                     }
                 }
