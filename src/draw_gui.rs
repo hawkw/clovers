@@ -1,5 +1,6 @@
 use crate::{color::Color, colorize::colorize, scenes::Scene, Float};
 
+use bevy::prelude::*;
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::prelude::*;
 use rayon::prelude::*;
@@ -25,6 +26,12 @@ pub fn draw_gui(
     gamma: Float,
     scene: Scene,
 ) -> Result<(), Error> {
+    // Bevy
+    App::build()
+        // .add_plugins(DefaultPlugins)
+        .run();
+
+    // Old render stuff below
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
     let window = {
