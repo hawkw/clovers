@@ -8,9 +8,9 @@ use crate::{
     textures::{Checkered, SolidColor},
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
-pub fn load(width: u32, height: u32, mut rng: ThreadRng) -> Scene {
+pub fn load(width: u32, height: u32, mut rng: WyRand) -> Scene {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world = HitableList::new();
@@ -24,11 +24,11 @@ pub fn load(width: u32, height: u32, mut rng: ThreadRng) -> Scene {
 
     for a in -11..11 {
         for b in -11..11 {
-            let choose_mat = rng.gen::<Float>();
+            let choose_mat = rng.generate::<Float>();
             let center = Vec3::new(
-                a as Float + 0.9 * rng.gen::<Float>(),
+                a as Float + 0.9 * rng.generate::<Float>(),
                 0.2,
-                b as Float + 0.9 * rng.gen::<Float>(),
+                b as Float + 0.9 * rng.generate::<Float>(),
             );
 
             if (center - Vec3::new(4.0, 0.2, 0.0)).norm() > 0.9 {
@@ -37,7 +37,7 @@ pub fn load(width: u32, height: u32, mut rng: ThreadRng) -> Scene {
                     let color = Color::random(rng);
                     let texture = SolidColor::new(color);
                     let sphere_material = Lambertian::new(texture);
-                    let center2 = center + Vec3::new(0.0, rng.gen_range(0.0, 0.5), 0.0);
+                    let center2 = center + Vec3::new(0.0, rng.generate_range(0.0, 0.5), 0.0);
                     world.add(MovingSphere::new(
                         center,
                         center2,
@@ -50,7 +50,7 @@ pub fn load(width: u32, height: u32, mut rng: ThreadRng) -> Scene {
                     // metal
                     let color = Color::random(rng);
                     let texture = SolidColor::new(color);
-                    let fuzz = rng.gen_range(0.0, 0.5);
+                    let fuzz = rng.generate_range(0.0..0.5);
                     let sphere_material = Metal::new(texture, fuzz);
                     world.add(Sphere::new(center, 0.2, sphere_material));
                 } else {

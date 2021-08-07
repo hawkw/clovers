@@ -11,7 +11,7 @@ use crate::{
     ray::Ray,
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
 use std::sync::Arc;
 
@@ -69,7 +69,7 @@ impl Hitable {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         match self {
             Hitable::Boxy(h) => h.hit(ray, distance_min, distance_max, rng),
@@ -104,7 +104,7 @@ impl Hitable {
         }
     }
 
-    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: WyRand) -> Float {
         match self {
             Hitable::XZRect(h) => h.pdf_value(origin, vector, time, rng),
             Hitable::XYRect(h) => h.pdf_value(origin, vector, time, rng),
@@ -115,7 +115,7 @@ impl Hitable {
         }
     }
 
-    pub fn random(&self, origin: Vec3, rng: ThreadRng) -> Vec3 {
+    pub fn random(&self, origin: Vec3, rng: WyRand) -> Vec3 {
         match self {
             Hitable::XZRect(h) => h.random(origin, rng),
             Hitable::XYRect(h) => h.random(origin, rng),
@@ -149,7 +149,7 @@ impl HitableList {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         let mut hit_record: Option<HitRecord> = None;
         let mut closest = distance_max;
@@ -196,7 +196,7 @@ impl HitableList {
 
         output_box
     }
-    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: WyRand) -> Float {
         let weight = 1.0 / self.0.len() as Float;
         let mut sum = 0.0;
 
@@ -207,9 +207,9 @@ impl HitableList {
         sum
     }
 
-    pub fn random(&self, origin: Vec3, mut rng: ThreadRng) -> Vec3 {
+    pub fn random(&self, origin: Vec3, mut rng: WyRand) -> Vec3 {
         let int_size = self.0.len();
-        self.0[rng.gen_range(0, int_size)].random(origin, rng)
+        self.0[rng.generate_range(0..int_size)].random(origin, rng)
     }
 
     pub fn new() -> HitableList {
@@ -220,7 +220,7 @@ impl HitableList {
         self.0.push(Arc::new(object));
     }
 
-    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: ThreadRng) -> Hitable {
+    pub fn into_bvh(self, time_0: Float, time_1: Float, rng: WyRand) -> Hitable {
         let bvh_node = BVHNode::from_list(self.0, time_0, time_1, rng);
         Hitable::BVHNode(bvh_node)
     }

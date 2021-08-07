@@ -6,7 +6,7 @@ use crate::{
     textures::{SolidColor, Texture},
     Float, Vec3,
 };
-use rand::prelude::ThreadRng;
+use nanorand::{Rng, WyRand};
 
 use serde::{Deserialize, Serialize};
 
@@ -30,7 +30,7 @@ impl<'a> DiffuseLight {
         self,
         _ray: &Ray,
         _hit_record: &HitRecord,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Option<ScatterRecord<'a>> {
         None
     }
@@ -40,7 +40,7 @@ impl<'a> DiffuseLight {
         _ray: &Ray,
         _hit_record: &HitRecord,
         _scattered: &Ray,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Float {
         0.0 // TODO: cleanup
     }

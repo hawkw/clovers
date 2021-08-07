@@ -1,7 +1,7 @@
 //! Color utilities.
 
 use crate::{Float, Vec3};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
 
@@ -29,11 +29,11 @@ impl Color {
         Color { r, g, b }
     }
 
-    pub fn random(mut rng: ThreadRng) -> Color {
+    pub fn random(mut rng: WyRand) -> Color {
         Color {
-            r: rng.gen::<Float>(),
-            g: rng.gen::<Float>(),
-            b: rng.gen::<Float>(),
+            r: rng.generate::<Float>(),
+            g: rng.generate::<Float>(),
+            b: rng.generate::<Float>(),
         }
     }
 

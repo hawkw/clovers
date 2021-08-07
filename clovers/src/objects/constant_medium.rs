@@ -6,7 +6,7 @@ use crate::{
     textures::Texture,
     Float, Vec3, EPSILON_CONSTANT_MEDIUM,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 
 use std::sync::Arc;
@@ -49,7 +49,7 @@ impl ConstantMedium {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        mut rng: ThreadRng,
+        mut rng: WyRand,
     ) -> Option<HitRecord> {
         let mut rec1: HitRecord;
         let mut rec2: HitRecord;
@@ -89,7 +89,7 @@ impl ConstantMedium {
 
         let ray_length: Float = ray.direction.norm();
         let distance_inside_boundary: Float = (rec2.distance - rec1.distance) * ray_length;
-        let hit_distance: Float = self.neg_inv_density * (rng.gen::<Float>()).ln(); // TODO: verify if log_e is correct here
+        let hit_distance: Float = self.neg_inv_density * (rng.generate::<Float>()).ln(); // TODO: verify if log_e is correct here
 
         if hit_distance > distance_inside_boundary {
             return None;

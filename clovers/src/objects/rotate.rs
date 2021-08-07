@@ -4,7 +4,7 @@ use crate::{
     ray::Ray,
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -89,7 +89,7 @@ impl RotateY {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         let mut origin: Vec3 = ray.origin;
         let mut direction: Vec3 = ray.direction;

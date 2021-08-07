@@ -5,7 +5,7 @@ use crate::{
     ray::Ray,
     Float, Vec3, PI,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MovingSphere {
@@ -55,7 +55,7 @@ impl MovingSphere {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Option<HitRecord> {
         let oc = ray.origin - self.center(ray.time);
         let a: Float = ray.direction.norm_squared();

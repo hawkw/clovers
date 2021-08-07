@@ -4,7 +4,7 @@ use crate::{
     ray::Ray,
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -34,7 +34,7 @@ impl Translate {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         let moved_ray: Ray = Ray::new(ray.origin - self.offset, ray.direction, ray.time);
 

@@ -3,7 +3,7 @@ use crate::{
     hitable::HitRecord, pdf::ZeroPDF, random::random_in_unit_sphere, ray::Ray, textures::Texture,
     Float, Vec3,
 };
-use rand::prelude::ThreadRng;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug, Copy, Clone)]
 pub struct Metal {
@@ -18,7 +18,7 @@ impl<'a> Metal {
         self,
         ray: &Ray,
         hit_record: &HitRecord,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<ScatterRecord<'a>> {
         let reflected: Vec3 = reflect(ray.direction.normalize(), hit_record.normal);
         Some(ScatterRecord {
@@ -38,7 +38,7 @@ impl<'a> Metal {
         _ray: &Ray,
         _hit_record: &HitRecord,
         _scattered: &Ray,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Float {
         0.0 // TODO: why does metal scatter 0? No mention in tutorial afaiu
     }

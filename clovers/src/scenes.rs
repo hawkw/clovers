@@ -7,7 +7,7 @@ use crate::{
     objects::Object,
     Float,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::prelude::*;
@@ -42,7 +42,7 @@ impl Scene {
         objects: HitableList,
         priority_objects: HitableList,
         background_color: Color,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Scene {
         Scene {
             objects: objects.into_bvh(time_0, time_1, rng),
@@ -69,7 +69,7 @@ pub fn initialize(mut file: File, width: u32, height: u32) -> Result<Scene, std:
     let scene_file: SceneFile = serde_json::from_str(&contents)?;
     let time_0 = scene_file.time_0;
     let time_1 = scene_file.time_1;
-    let rng = thread_rng();
+    let rng = WyRand::new();
     let background_color = scene_file.background_color;
     let camera = Camera::new(
         scene_file.camera.look_from,

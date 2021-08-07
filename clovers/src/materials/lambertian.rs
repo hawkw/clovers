@@ -1,6 +1,6 @@
 use super::{MaterialType, ScatterRecord};
 use crate::{hitable::HitRecord, pdf::CosinePDF, ray::Ray, textures::Texture, Float, PI};
-use rand::prelude::ThreadRng;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, Default)]
@@ -15,7 +15,7 @@ impl<'a> Lambertian {
         self,
         _ray: &Ray,
         hit_record: &HitRecord,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Option<ScatterRecord<'a>> {
         Some(ScatterRecord {
             material_type: MaterialType::Diffuse,
@@ -32,7 +32,7 @@ impl<'a> Lambertian {
         _ray: &Ray,
         hit_record: &HitRecord,
         scattered: &Ray,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Float {
         let cosine = hit_record.normal.dot(&scattered.direction.normalize());
         if cosine < 0.0 {

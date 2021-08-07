@@ -6,7 +6,7 @@ use crate::{
     ray::Ray,
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -64,7 +64,7 @@ impl Boxy {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         self.sides.hit(ray, distance_min, distance_max, rng)
     }

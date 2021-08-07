@@ -7,7 +7,7 @@ use crate::{
     ray::Ray,
     Float, Vec3, EPSILON_SHADOW_ACNE, PI,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
@@ -49,7 +49,7 @@ impl Sphere {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Option<HitRecord> {
         let oc: Vec3 = ray.origin - self.center;
         let a: Float = ray.direction.norm_squared();
@@ -107,7 +107,7 @@ impl Sphere {
         Some(output_box)
     }
 
-    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn pdf_value(&self, origin: Vec3, vector: Vec3, time: Float, rng: WyRand) -> Float {
         match self.hit(
             &Ray::new(origin, vector, time),
             EPSILON_SHADOW_ACNE,
@@ -126,7 +126,7 @@ impl Sphere {
         }
     }
 
-    pub fn random(&self, origin: Vec3, rng: ThreadRng) -> Vec3 {
+    pub fn random(&self, origin: Vec3, rng: WyRand) -> Vec3 {
         let direction: Vec3 = self.center - origin;
         let distance_squared: Float = direction.norm_squared();
         let uvw = ONB::build_from_w(direction);

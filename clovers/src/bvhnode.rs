@@ -2,7 +2,7 @@
 
 use std::{cmp::Ordering, sync::Arc};
 
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
 use crate::{
     aabb::AABB,
@@ -24,10 +24,10 @@ impl BVHNode {
         mut objects: Vec<Arc<Hitable>>,
         time_0: Float,
         time_1: Float,
-        mut rng: ThreadRng,
+        mut rng: WyRand,
     ) -> BVHNode {
         {
-            let axis: usize = rng.gen_range(0, 2);
+            let axis: usize = rng.generate_range(0..2);
             let comparators = [box_x_compare, box_y_compare, box_z_compare];
             let comparator = comparators[axis];
 
@@ -96,7 +96,7 @@ impl BVHNode {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         match self.bounding_box.hit(&ray, distance_min, distance_max) {
             false => None,

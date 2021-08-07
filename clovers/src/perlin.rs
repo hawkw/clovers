@@ -1,7 +1,7 @@
 //! Perlin noise implementation. Used for e.g. [NoiseTexture](crate::textures::Texture::NoiseTexture)
 
 use crate::{Float, Vec3};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
 use std::fmt::Debug;
 
@@ -26,7 +26,7 @@ impl Debug for Perlin {
     }
 }
 
-fn perlin_generate_perm(rng: ThreadRng) -> [usize; 256] {
+fn perlin_generate_perm(rng: WyRand) -> [usize; 256] {
     let mut perm: [usize; 256] = [0; 256];
 
     for i in 0..256 {
@@ -37,10 +37,10 @@ fn perlin_generate_perm(rng: ThreadRng) -> [usize; 256] {
     perm
 }
 
-fn permute(p: &mut [usize; 256], mut rng: ThreadRng) {
+fn permute(p: &mut [usize; 256], mut rng: WyRand) {
     // For some reason the tutorial wants the reverse loop
     for i in (1..256).rev() {
-        let target: usize = rng.gen_range(0, i);
+        let target: usize = rng.generate_range(0..i);
         p.swap(i, target);
     }
 }
@@ -69,10 +69,10 @@ fn perlin_interp(c: [[[Vec3; 2]; 2]; 2], u: Float, v: Float, w: Float) -> Float 
 }
 
 impl Perlin {
-    pub fn new(mut rng: ThreadRng) -> Self {
+    pub fn new(mut rng: WyRand) -> Self {
         let mut random_vectors: [Vec3; 256] = [Vec3::new(0.0, 0.0, 0.0); 256];
         for i in 0..256 {
-            random_vectors[i] = rng.gen::<Vec3>();
+            random_vectors[i] = rng.generate::<Vec3>();
         }
 
         let perm_x = perlin_generate_perm(rng);
@@ -140,7 +140,7 @@ impl Perlin {
 
 impl Default for Perlin {
     fn default() -> Self {
-        let rng = thread_rng();
+        let rng = WyRand::new();
         Perlin::new(rng)
     }
 }

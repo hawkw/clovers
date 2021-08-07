@@ -1,6 +1,6 @@
 use crate::{color::Color, colorize::colorize, ray::Ray, scenes, Float};
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use rayon::prelude::*;
 use scenes::Scene;
 
@@ -30,7 +30,7 @@ pub fn draw(
         .for_each(|(index, pixel)| {
             let x = index % width as usize;
             let y = index / width as usize;
-            let rng = rand::thread_rng();
+            let rng = WyRand::new();
             let mut color: Color = Color::new(0.0, 0.0, 0.0);
 
             // Multisampling for antialiasing
@@ -58,11 +58,11 @@ fn sample(
     y: usize,
     width: u32,
     height: u32,
-    mut rng: ThreadRng,
+    mut rng: WyRand,
     max_depth: u32,
 ) -> Option<Color> {
-    let u = (x as Float + rng.gen::<Float>()) / width as Float;
-    let v = (y as Float + rng.gen::<Float>()) / height as Float;
+    let u = (x as Float + rng.generate::<Float>()) / width as Float;
+    let v = (y as Float + rng.generate::<Float>()) / height as Float;
     let ray: Ray = scene.camera.get_ray(u, v, rng);
     let new_color = colorize(&ray, &scene, 0, max_depth, rng);
     // skip NaN and Infinity

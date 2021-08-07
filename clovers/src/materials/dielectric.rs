@@ -1,6 +1,6 @@
 use super::{reflect, refract, schlick, Material, MaterialType, ScatterRecord};
 use crate::{color::Color, hitable::HitRecord, pdf::ZeroPDF, ray::Ray, Float, Vec3};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +28,7 @@ impl<'a> Dielectric {
         self,
         ray: &Ray,
         hit_record: &HitRecord,
-        mut rng: ThreadRng,
+        mut rng: WyRand,
     ) -> Option<ScatterRecord<'a>> {
         let albedo = self.color;
         let specular_ray: Ray;
@@ -52,7 +52,7 @@ impl<'a> Dielectric {
             })
         } else {
             let reflect_probability: Float = schlick(cos_theta, etai_over_etat);
-            if rng.gen::<Float>() < reflect_probability {
+            if rng.generate::<Float>() < reflect_probability {
                 let reflected: Vec3 = reflect(unit_direction, hit_record.normal);
                 specular_ray = Ray::new(hit_record.position, reflected, ray.time);
                 Some(ScatterRecord {
@@ -79,7 +79,7 @@ impl<'a> Dielectric {
         _ray: &Ray,
         _hit_record: &HitRecord,
         _scattered: &Ray,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Float {
         todo!()
     }

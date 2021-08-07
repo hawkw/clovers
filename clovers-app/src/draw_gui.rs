@@ -1,7 +1,7 @@
 use crate::{color::Color, colorize::colorize, scenes::Scene, Float};
 
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use rayon::prelude::*;
 
 use pixels::{Error, Pixels, SurfaceTexture};
@@ -138,8 +138,8 @@ impl World {
                 let mut rng = rand::thread_rng();
                 let mut color: Color = Color::new(0.0, 0.0, 0.0);
 
-                let u = (x as Float + rng.gen::<Float>()) / width as Float;
-                let v = (y as Float + rng.gen::<Float>()) / height as Float;
+                let u = (x as Float + rng.generate::<Float>()) / width as Float;
+                let v = (y as Float + rng.generate::<Float>()) / height as Float;
                 let ray = camera.get_ray(u, v, rng);
                 let new_color = colorize(&ray, &scene, 0, max_depth, rng);
                 // skip NaN and Infinity

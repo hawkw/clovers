@@ -1,7 +1,7 @@
 //! Camera. Used for creating [Rays](crate::ray::Ray) towards the scene, with directions defined by the camera properties.
 
 use crate::{random::random_in_unit_disk, ray::Ray, Float, Vec3, PI};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
@@ -74,12 +74,12 @@ impl Camera {
     }
 
     // TODO: fix the mysterious (u,v) vs (s,t) change that came from the tutorial
-    pub fn get_ray(self, s: Float, t: Float, mut rng: ThreadRng) -> Ray {
+    pub fn get_ray(self, s: Float, t: Float, mut rng: WyRand) -> Ray {
         // TODO: add a better defocus blur / depth of field implementation
         let rd: Vec3 = self.lens_radius * random_in_unit_disk(&mut rng);
         let offset: Vec3 = self.u * rd.x + self.v * rd.y;
         // Randomized time used for motion blur
-        let time: Float = rng.gen_range(self.time_0, self.time_1);
+        let time: Float = rng.generate_range(self.time_0..self.time_1);
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,

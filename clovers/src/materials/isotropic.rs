@@ -2,7 +2,7 @@ use super::{Material, MaterialType, ScatterRecord};
 use crate::{
     color::Color, hitable::HitRecord, pdf::CosinePDF, ray::Ray, textures::Texture, Float, PI,
 };
-use rand::prelude::ThreadRng;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug, Copy, Clone, Default)]
 pub struct Isotropic {
@@ -19,7 +19,7 @@ impl<'a> Isotropic {
         self,
         _ray: &Ray,
         hit_record: &HitRecord,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Option<ScatterRecord<'a>> {
         // TODO: fix / verify correctness!
         // this is just copied from lambertian as an experiment
@@ -40,7 +40,7 @@ impl<'a> Isotropic {
         _ray: &Ray,
         hit_record: &HitRecord,
         scattered: &Ray,
-        _rng: ThreadRng,
+        _rng: WyRand,
     ) -> Float {
         // TODO: fix / verify correctness!
         // this is just copied from lambertian as an experiment

@@ -1,7 +1,7 @@
 //! Probability density functions
 
 use crate::{hitable::Hitable, onb::ONB, random::random_cosine_direction, Float, Vec3, PI};
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use std::sync::Arc;
 
 pub enum PDF<'a> {
@@ -12,7 +12,7 @@ pub enum PDF<'a> {
 }
 
 impl<'a> PDF<'a> {
-    pub fn value(&self, direction: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn value(&self, direction: Vec3, time: Float, rng: WyRand) -> Float {
         match self {
             PDF::CosinePDF(p) => p.value(direction, time, rng),
             PDF::HitablePDF(p) => p.value(direction, time, rng),
@@ -20,7 +20,7 @@ impl<'a> PDF<'a> {
             PDF::ZeroPDF(p) => p.value(direction, time, rng),
         }
     }
-    pub fn generate(&self, rng: ThreadRng) -> Vec3 {
+    pub fn generate(&self, rng: WyRand) -> Vec3 {
         match self {
             PDF::CosinePDF(p) => p.generate(rng),
             PDF::HitablePDF(p) => p.generate(rng),
@@ -41,7 +41,7 @@ impl<'a> CosinePDF {
         })
     }
 
-    pub fn value(&self, direction: Vec3, _time: Float, _rng: ThreadRng) -> Float {
+    pub fn value(&self, direction: Vec3, _time: Float, _rng: WyRand) -> Float {
         let cosine = direction.normalize().dot(&self.uvw.w);
         if cosine <= 0.0 {
             0.0
@@ -50,7 +50,7 @@ impl<'a> CosinePDF {
         }
     }
 
-    pub fn generate(&self, rng: ThreadRng) -> Vec3 {
+    pub fn generate(&self, rng: WyRand) -> Vec3 {
         self.uvw.local(random_cosine_direction(rng))
     }
 }
@@ -65,11 +65,11 @@ impl<'a> HitablePDF<'a> {
         PDF::HitablePDF(HitablePDF { origin, hitable })
     }
 
-    pub fn value(&self, direction: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn value(&self, direction: Vec3, time: Float, rng: WyRand) -> Float {
         self.hitable.pdf_value(self.origin, direction, time, rng)
     }
 
-    pub fn generate(&self, rng: ThreadRng) -> Vec3 {
+    pub fn generate(&self, rng: WyRand) -> Vec3 {
         self.hitable.random(self.origin, rng)
     }
 }
@@ -88,12 +88,12 @@ impl<'a> MixturePDF<'a> {
         })
     }
 
-    pub fn value(&self, direction: Vec3, time: Float, rng: ThreadRng) -> Float {
+    pub fn value(&self, direction: Vec3, time: Float, rng: WyRand) -> Float {
         0.5 * self.pdf1.value(direction, time, rng) + 0.5 * self.pdf2.value(direction, time, rng)
     }
 
-    pub fn generate(&self, mut rng: ThreadRng) -> Vec3 {
-        if rng.gen::<bool>() {
+    pub fn generate(&self, mut rng: WyRand) -> Vec3 {
+        if rng.generate::<bool>() {
             self.pdf1.generate(rng)
         } else {
             self.pdf2.generate(rng)
@@ -109,11 +109,11 @@ impl<'a> ZeroPDF {
         PDF::ZeroPDF(ZeroPDF {})
     }
 
-    pub fn value(&self, _direction: Vec3, _time: Float, _rng: ThreadRng) -> Float {
+    pub fn value(&self, _direction: Vec3, _time: Float, _rng: WyRand) -> Float {
         0.0
     }
 
-    pub fn generate(&self, _rng: ThreadRng) -> Vec3 {
+    pub fn generate(&self, _rng: WyRand) -> Vec3 {
         Vec3::new(1.0, 0.0, 0.0)
     }
 }

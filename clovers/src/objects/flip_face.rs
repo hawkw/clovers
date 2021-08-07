@@ -4,7 +4,7 @@ use crate::{
     ray::Ray,
     Float,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -31,7 +31,7 @@ impl FlipFace {
         ray: &Ray,
         distance_min: Float,
         distance_max: Float,
-        rng: ThreadRng,
+        rng: WyRand,
     ) -> Option<HitRecord> {
         match self.object.hit(ray, distance_min, distance_max, rng) {
             Some(hit_record) => Some(HitRecord {

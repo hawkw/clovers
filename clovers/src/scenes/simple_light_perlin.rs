@@ -9,10 +9,10 @@ use crate::{
     textures::{NoiseTexture, SolidColor},
     Float, Vec3,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 use std::sync::Arc;
 
-pub fn load<'a>(width: u32, height: u32, rng: ThreadRng) -> Scene<'a> {
+pub fn load<'a>(width: u32, height: u32, rng: WyRand) -> Scene<'a> {
     let time_0: Float = 0.0;
     let time_1: Float = 1.0;
     let mut world = HitableList::new();

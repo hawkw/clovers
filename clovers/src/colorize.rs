@@ -7,10 +7,10 @@ use crate::{
     scenes::Scene,
     Float, EPSILON_SHADOW_ACNE,
 };
-use rand::prelude::*;
+use nanorand::{Rng, WyRand};
 
 /// The main coloring function
-pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: ThreadRng) -> Color {
+pub fn colorize(ray: &Ray, scene: &Scene, depth: u32, max_depth: u32, rng: WyRand) -> Color {
     if depth > max_depth {
         // Ray bounce limit reached, return background_color
         return scene.background_color;
